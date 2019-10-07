@@ -1,6 +1,12 @@
 # libVirt Web
 A simple web interface based on libVirt.
 
+> This project is still a **Work In Progress**, it might not work correctly on your side.
+>
+> Please, create an issue in this case so I can track and fix it.
+>
+> Thank you.
+
 # Preview
 ![image](https://user-images.githubusercontent.com/9881407/66279294-ed9eb480-e8b0-11e9-8382-c6fa65313ee0.png)
 ![image](https://user-images.githubusercontent.com/9881407/66279362-4b330100-e8b1-11e9-9b65-b78164269978.png)
@@ -11,12 +17,15 @@ The installation process is pretty simple and will require only few dependencies
 The web interface should be able to run on desktops and servers.
 
 ## Dependencies
-There is only few dependencies required, you will need at least four packages:
+There is only few dependencies required, you will need at least five packages:
 
- 1. `libVirt` (`virsh` should be provided by [libVirt](https://libvirt.org/))
+ 1. `libvirt-bin` (The `virsh` command should be provided by [libVirt](https://libvirt.org/))
  2. `virt-viewer`
  3. `php-cli`
  4. `php-json`
+ 5. `imagemagick` (For the `convert` command, used to convert screenshots from `PPM` to `PNG`)
+
+> The `imagemagick` package might be replaced later by `php-imagick` to keep depenencies on the `PHP` side.
 
 ## Plaforms
 The project has been tested on [Pop_OS!](https://system76.com/pop), a Linux distribution based on [Ubuntu 18.04 LTS](https://wiki.ubuntu.com/BionicBeaver/ReleaseNotes).
@@ -27,7 +36,7 @@ It is also tested on FreeBSD by my friend [@Sevendogs5](https://twitter.com/Seve
 You should only need to install these packages:
 
 ```bash
-sudo apt install libvirt libvirt-bin php-cli php-json
+sudo apt install libvirt-bin virt-viewer imagemagick php-cli php-json
 ```
 
 > I need to validate the packages list so this might change later.
