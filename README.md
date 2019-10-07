@@ -2,7 +2,8 @@
 A simple web interface based on libVirt.
 
 # Preview
-[place picture here]
+![image](https://user-images.githubusercontent.com/9881407/66279294-ed9eb480-e8b0-11e9-8382-c6fa65313ee0.png)
+![image](https://user-images.githubusercontent.com/9881407/66279362-4b330100-e8b1-11e9-9b65-b78164269978.png)
 
 # Installation
 The installation process is pretty simple and will require only few dependencies.
