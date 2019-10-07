@@ -12,13 +12,13 @@ The web interface should be able to run on desktops and servers.
 ## Dependencies
 There is only few dependencies required, you will need at least four packages:
 
- 1. `libVirt` (`virsh` should be provided by `libVirt`)
+ 1. `libVirt` (`virsh` should be provided by [libVirt](https://libvirt.org/))
  2. `virt-viewer`
  3. `php-cli`
  4. `php-json`
 
 ## Plaforms
-The project has been tested on [Pop_OS!](#), a Linux distribution based on Ubuntu 18.04 LTS.
+The project has been tested on [Pop_OS!](https://system76.com/pop), a Linux distribution based on [Ubuntu 18.04 LTS](https://wiki.ubuntu.com/BionicBeaver/ReleaseNotes).
 
 It is also tested on FreeBSD by my friend [@Sevendogs5](https://twitter.com/Sevendogs5).
 
