@@ -85,6 +85,7 @@ Here will be listed missing features / those not working correctly.
  * ISO image upload.
    * The upload is working but the uploaded file can't be moved to `/var/lib/libvirt/images`...
    * This is due to access restricted to `sudoers` with filesystem permissions.
+ * Graphics are still missing.
 
 # Thanks
 Thanks to the respective developers for their amazing work.
