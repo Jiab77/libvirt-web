@@ -82,6 +82,9 @@ Here will be listed missing features / those not working correctly.
    * Works on local only...
  * Connection to remote hypervisor.
    * Not implemented yet / not correctly...
+ * ISO image upload.
+   * The upload is working but the uploaded file can't be moved to `/var/lib/libvirt/images`...
+   * This is due to access restricted to `sudoers` with filesystem permissions.
 
 # Thanks
 Thanks to the respective developers for their amazing work.
