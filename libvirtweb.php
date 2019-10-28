@@ -45,11 +45,12 @@ if (!isset($_SESSION['vm_pools']) ||
 	(isset($_SESSION['vm_pools']) && !is_array($_SESSION['vm_pools']))) {
 		$_SESSION['vm_pools'] = $libVirt->get_vm_pools();
 }
-if (isset($_SESSION) && is_array($_SESSION) && $_SESSION['module'] !== 'ajx') {
-	echo '<!-- ' . PHP_EOL;
-	// var_dump($_SESSION);
-	print_r($_SESSION);
-	echo ' -->' . PHP_EOL;
+if (isset($_SESSION) && is_array($_SESSION) &&
+	isset($_SESSION['module']) && $_SESSION['module'] !== 'ajx') {
+		echo '<!-- ' . PHP_EOL;
+		// var_dump($_SESSION);
+		print_r($_SESSION);
+		echo ' -->' . PHP_EOL;
 }
 
 // Content selector
