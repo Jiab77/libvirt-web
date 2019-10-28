@@ -22,10 +22,10 @@ There is only few dependencies required, you will need at least five packages:
  1. `libvirt-bin` (The `virsh` command should be provided by [libVirt](https://libvirt.org/))
  2. `virt-viewer`
  3. `php-cli`
- 4. `php-json`
- 5. `imagemagick` (For the `convert` command, used to convert screenshots from `PPM` to `PNG`)
+ 4. `php-xml`
+ 5. `php-json`
 
-> The `imagemagick` package might be replaced later by `php-imagick` to keep depenencies on the `PHP` side.
+> I have dropped the ImageMagick `convert` command from dependencies.
 
 ## Plaforms
 The project has been tested on [Pop_OS!](https://system76.com/pop), a Linux distribution based on [Ubuntu 18.04 LTS](https://wiki.ubuntu.com/BionicBeaver/ReleaseNotes).
@@ -36,10 +36,10 @@ It is also tested on FreeBSD by my friend [@Sevendogs5](https://twitter.com/Seve
 You should only need to install these packages:
 
 ```bash
-sudo apt install libvirt-bin virt-viewer imagemagick php-cli php-json
+sudo apt install libvirt-bin virt-viewer php-cli php-xml php-json
 ```
 
-> I need to validate the packages list so this might change later.
+> I still need to validate the packages list so this might change later.
 
 ### FreeBSD
 Instruction will be provided soon.
@@ -66,8 +66,27 @@ Then navigate to http://localhost:8000 with your internet browser.
 ### Apache / nginx
 This setup is not tested yet and will be documented later.
 
+# Breaking Changes
+I've changed completely the project structure and now the code is splitted into several files instead of keeping everything into a single file.
+
+The more I was adding features and cleaner logic, the more it became difficult to maintain and keep it readable and understandable.
+
+So the best solution that came to me was split the single file into several ones, now it's much more easier to maintain the project.
+
+A single file version still exist if you look at the file `libvirtweb.aio.php` but it will not be supported anymore.
+
+# Missing / Not Working
+Here will be listed missing features / those not working correctly.
+
+ * Remote connection on VM's using `virt-viewer`.
+   * Works on local only...
+ * Connection to remote hypervisor.
+   * Not implemented yet / not correctly...
+
 # Thanks
 Thanks to the respective developers for their amazing work.
+
+Huge thanks to [Ingmar Decker](http://www.webdecker.de) for the `PPM` Image Reader `PHP` class.
 
 Also thanks to my friend [@Sevendogs5](https://twitter.com/Sevendogs5) for supporting the FreeBSD platform.
 
