@@ -124,11 +124,11 @@
 
 			</tbody>
 		</table>
-		<!-- <h5>Raw data</h5>
+		<h5>Raw data</h5>
 		<pre><?php
 		print_r($output_ifaces);
 		var_dump($ret_ifaces);
-		?></pre> -->
+		?></pre>
 		<h3>Network Addresses</h3>
 		<pre><?php
 		if ($selected_vm === 'ceph-admin') {
