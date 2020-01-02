@@ -59,7 +59,7 @@ if (isset($_GET['module']) && !empty($_GET['module'])) {
 	$_SESSION['module'] = $module;
 }
 if (isset($_GET['action']) && !empty($_GET['action'])) {
-	$ajax_action = htmlentities(strip_tags(filter_var($_GET['action'], FILTER_SANITIZE_STRING)));
+	$vm_action = htmlentities(strip_tags(filter_var($_GET['action'], FILTER_SANITIZE_STRING)));
 }
 if (isset($_GET['do']) && !empty($_GET['do'])) {
 	$module_action = htmlentities(strip_tags(filter_var($_GET['do'], FILTER_SANITIZE_STRING)));
@@ -67,6 +67,14 @@ if (isset($_GET['do']) && !empty($_GET['do'])) {
 if (isset($_GET['name']) && !empty($_GET['name'])) {
 	$selected_vm = htmlentities(strip_tags(filter_var($_GET['name'], FILTER_SANITIZE_STRING)));
 	$_SESSION['active_vm'] = $selected_vm;
+}
+if (isset($_GET['uri']) && !empty($_GET['uri'])) {
+	$connect_uri = htmlentities(strip_tags(filter_var($_GET['uri'], FILTER_SANITIZE_STRING)));
+	$_SESSION['connect_uri'] = $connect_uri;
+}
+if (isset($_GET['user']) && !empty($_GET['user'])) {
+	$connect_user = htmlentities(strip_tags(filter_var($_GET['user'], FILTER_SANITIZE_STRING)));
+	$_SESSION['connect_user'] = $connect_user;
 }
 
 // Displayed title
@@ -91,72 +99,128 @@ else {
 	$page_title = $project_title;
 }
 
-// Actions (Ajax)
-if (isset($ajax_action) && !empty($ajax_action)) {
-	$ajax_output = '';
-	switch ($ajax_action) {
-		case 'reboot':
-			$ajax_cmd = 'reboot ' . $_SESSION['active_vm'];
-			$libVirt->virsh_exec_notify($ajax_cmd, $ajax_output, $ret_action);
-			break;
-
-		case 'resume':
-			$ajax_cmd = 'resume ' . $_SESSION['active_vm'];
-			$libVirt->virsh_exec_notify($ajax_cmd, $ajax_output, $ret_action);
-			break;
-
-		case 'save':
-			$ajax_cmd  = 'snapshot-create-as --domain ' . $_SESSION['active_vm'];
-			$ajax_cmd .= ' --name "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'live' : 'offline') . '-snapshot-' . date("dmYHis") . '"';
-			$ajax_cmd .= ' --description "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'Live' : 'Offline') . ' snapshot taken on ' . date("d/m/Y H:i:s") . '"';
-			$libVirt->virsh_exec_notify($ajax_cmd, $ajax_output, $ret_action);
-
-			// Create a 'disk-only' snapshot in case of error
-			if ($ret_action !== 0) {
-				$ajax_cmd  = 'snapshot-create-as --domain ' . $_SESSION['active_vm'];
-				$ajax_cmd .= ' --name "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'live' : 'offline') . '-disk-only-snapshot-' . date("dmYHis") . '"';
-				$ajax_cmd .= ' --description "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'Live' : 'Offline') . ' disk-only snapshot taken on ' . date("d/m/Y H:i:s") . '"';
-				$ajax_cmd .= ' --quiesce';
-				$ajax_cmd .= ' --disk-only';
-				$libVirt->virsh_exec_notify($ajax_cmd, $ajax_output, $ret_action);
+// Actions (All Modules)
+if (isset($vm_action) && !empty($vm_action)) {
+	$virsh_output = '';
+	switch ($vm_action) {
+		case 'clone':
+			if ($libVirt->vm_is_paused($_SESSION['active_vm']) === true) {
+				$exec_cmd  = 'virt-clone --original ' . $_SESSION['active_vm'];
+				$exec_cmd .= ' --name ' . $_SESSION['active_vm'] . '-clone';
+				// $exec_cmd .= ' --file ' . $_SESSION['active_vm'] . '-clone-disk';
+				$exec_cmd .= ' --auto-clone';
+				$exec_cmd .= ' --debug';
+				$libVirt->exec_notify($exec_cmd, $exec_output, $ret_action);
+			}
+			else {
+				$libVirt->notify('Error: VM must be stopped or paused.', true);
 			}
 			break;
 
-		case 'del':
-			$ajax_cmd  = 'undefine --domain ' . $_SESSION['active_vm'];
-			/* $ajax_cmd .= ' --remove-all-storage --managed-save --delete-snapshots';
-			$ajax_cmd .= ' --snapshots-metadata --nvram'; */
+		case 'create':
+			# code...
+			break;
+
+		case 'delete':
+			/* $virsh_cmd  = 'undefine --domain ' . $_SESSION['active_vm'];
+			$virsh_cmd .= ' --remove-all-storage --managed-save --delete-snapshots';
+			$virsh_cmd .= ' --snapshots-metadata --nvram'; */
 
 			// Disabled for now, it requires much more debug to be in place right now...
-			// $libVirt->virsh_exec_notify($ajax_cmd, $ajax_output, $ret_action);
+			// $libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
 
 			// Retry to delete using another way in case of error
 			/* if ($ret_action !== 0) {
-				$ajax_cmd  = 'undefine --domain ' . $_SESSION['active_vm'];
-				$ajax_cmd .= ' --remove-all-storage --managed-save --delete-snapshots';
-				$ajax_cmd .= ' --snapshots-metadata --nvram';
-				$libVirt->virsh_exec_notify($ajax_cmd, $ajax_output, $ret_action);
+				$virsh_cmd  = 'undefine --domain ' . $_SESSION['active_vm'];
+				$virsh_cmd .= ' --remove-all-storage --managed-save --delete-snapshots';
+				$virsh_cmd .= ' --snapshots-metadata --nvram';
+				$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
 			} */
 			break;
 
+		case 'prep':
+			if ($libVirt->vm_is_paused($_SESSION['active_vm']) === true) {
+				$excluded_operations = "$(virt-sysprep --list-operations | egrep -v 'fs-uuids|lvm-uuids|ssh-userdir' | awk '{ printf \"%s,\", $1}' | sed 's/,$//')";
+				$exec_cmd  = 'virt-sysprep --domain ' . $_SESSION['active_vm'] . '-clone';
+				$exec_cmd .= ' --hostname ' . $_SESSION['active_vm'] . '-clone';
+				$exec_cmd .= ' --keep-user-accounts ' . $_SESSION['active_vm_user'];
+				$exec_cmd .= ' --enable ' . $excluded_operations;
+				// If debian based VM
+				// $exec_cmd .= ' --firstboot-command "dpkg-reconfigure openssh-server"';
+				$exec_cmd .= ' --verbose';
+				// For more debugging (enable tracing of libguestfs calls)
+				// $exec_cmd .= ' -x';
+				$exec_cmd .= ' --dry-run';
+				$libVirt->exec_notify($exec_cmd, $exec_output, $ret_action);
+			}
+			else {
+				$libVirt->notify('Error: VM must be stopped or paused.', true);
+			}
+			break;
+
+		case 'reboot':
+			$virsh_cmd = 'reboot ' . $_SESSION['active_vm'];
+			$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
+			break;
+
+		case 'resume':
+			$virsh_cmd = 'resume ' . $_SESSION['active_vm'];
+			$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
+			break;
+
+		case 'snap':
+			$virsh_cmd  = 'snapshot-create-as --domain ' . $_SESSION['active_vm'];
+			$virsh_cmd .= ' --name "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'live' : 'offline') . '-snapshot-' . date("dmYHis") . '"';
+			$virsh_cmd .= ' --description "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'Live' : 'Offline') . ' snapshot taken on ' . date("d/m/Y H:i:s") . '"';
+			$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
+
+			// Create a 'disk-only' snapshot in case of error
+			if ($ret_action !== 0) {
+				$virsh_cmd  = 'snapshot-create-as --domain ' . $_SESSION['active_vm'];
+				$virsh_cmd .= ' --name "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'live' : 'offline') . '-disk-only-snapshot-' . date("dmYHis") . '"';
+				$virsh_cmd .= ' --description "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'Live' : 'Offline') . ' disk-only snapshot taken on ' . date("d/m/Y H:i:s") . '"';
+				// $virsh_cmd .= ' --quiesce'; // Only when qemu agent is installed
+				$virsh_cmd .= ' --disk-only';
+				$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action2);
+			}
+
+			// Retry while stopping the VM first
+			if ($ret_action2 !== 0) {
+				$virsh_cmd  = 'shutdown --domain ' . $_SESSION['active_vm'];
+				$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
+
+				$virsh_cmd  = 'snapshot-create-as --domain ' . $_SESSION['active_vm'];
+				$virsh_cmd .= ' --name "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'live' : 'offline') . '-snapshot-' . date("dmYHis") . '"';
+				$virsh_cmd .= ' --description "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'Live' : 'Offline') . ' snapshot taken on ' . date("d/m/Y H:i:s") . '"';
+				$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
+			}
+			break;
+
 		case 'start':
-			$ajax_cmd = 'start ' . $_SESSION['active_vm'];
-			$libVirt->virsh_exec_notify($ajax_cmd, $ajax_output, $ret_action);
+			$virsh_cmd = 'start ' . $_SESSION['active_vm'];
+			$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
 			break;
 
 		case 'stop':
-			$ajax_cmd = 'shutdown ' . $_SESSION['active_vm'];
-			$libVirt->virsh_exec_notify($ajax_cmd, $ajax_output, $ret_action);
+			$virsh_cmd = 'shutdown ' . $_SESSION['active_vm'];
+			$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
+
+			// Force shutdown in case of error
+			if ($ret_action !== 0 || $libVirt->vm_is_active($_SESSION['active_vm']) === true) {
+				$virsh_cmd = 'destroy ' . $_SESSION['active_vm'];
+				$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
+			}
 			break;
 
 		case 'suspend':
-			$ajax_cmd = 'suspend ' . $_SESSION['active_vm'];
-			$libVirt->virsh_exec_notify($ajax_cmd, $ajax_output, $ret_action);
+			$virsh_cmd = 'suspend ' . $_SESSION['active_vm'];
+			$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
 			break;
 
 		case 'view':
-			$ajax_cmd = 'virt-viewer -v -w ' . escapeshellarg($_SESSION['active_vm']) . ' &';
-			exec($ajax_cmd, $ajax_output, $ret_action);
+			$libVirt->notify('Starting virt-viewer...');
+			$exec_cmd = 'virt-viewer -v -w ' . escapeshellarg($_SESSION['active_vm']) . ' &';
+			$libVirt->exec_notify($exec_cmd, $exec_output, $ret_action);
 			break;
 		
 		default:
@@ -165,12 +229,26 @@ if (isset($ajax_action) && !empty($ajax_action)) {
 	}
 }
 
-// Actions (Modules)
+// Actions (Per Modules)
 if (isset($module_action) && !empty($module_action)) {
 	$module_output = '';
 	switch ($module_action) {
-		case 'create':
-			# code...
+		case 'connect':
+			if (isset($_SESSION['connect_uri']) && filter_var($_SESSION['connect_uri'], FILTER_VALIDATE_IP) === true &&
+				isset($_SESSION['connect_user']) && !empty($_SESSION['connect_user'])) {
+					$qemu_uri = 'qemu+ssh://' . $_SESSION['connect_user'] . '@' . $_SESSION['connect_uri'] . '/system';
+			}
+			elseif (isset($_SESSION['connect_uri']) &&
+					$_SESSION['connect_uri'] === 'session' ||
+					$_SESSION['connect_uri'] === 'system') {
+						$qemu_uri = 'qemu://' . $_SESSION['connect_uri'];
+			}
+			else {
+				$qemu_uri = null;
+			}
+			if (!is_null($qemu_uri)) {
+				$libVirt->virsh_connect($qemu_uri);
+			}
 			break;
 
 		case 'view':
@@ -204,83 +282,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Ajax
 if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 	if (isset($_REQUEST['data']) && !empty($_REQUEST['data'])) {
-		$ajax_data = htmlentities(strip_tags(filter_var($_REQUEST['data'], FILTER_SANITIZE_STRING)));
+		$stat_data = htmlentities(strip_tags(filter_var($_REQUEST['data'], FILTER_SANITIZE_STRING)));
 
-		switch ($ajax_data) {
+		switch ($stat_data) {
 			case 'cpu':
-				$ajax_cmd = $libVirt->virsh_shell_exec('nodecpustats');
+				$stat_cmd = $libVirt->virsh_shell_exec('nodecpustats');
 				break;
 
 			case 'mem':
-				$ajax_cmd = $libVirt->virsh_shell_exec('nodememstats');
+				$stat_cmd = $libVirt->virsh_shell_exec('nodememstats');
 				break;
 
 			case 'node':
-				$ajax_cmd = $libVirt->virsh_shell_exec('nodeinfo');
+				$stat_cmd = $libVirt->virsh_shell_exec('nodeinfo');
 				break;
 
 			case 'vhostcpu':
 				if ($libVirt->vm_is_active($_SESSION['active_vm'])) {
-					$ajax_cmd = $libVirt->virsh_shell_exec('cpu-stats ' . $_SESSION['active_vm']);
+					$stat_cmd = $libVirt->virsh_shell_exec('cpu-stats ' . $_SESSION['active_vm']);
 				}
 				else {
-					$ajax_cmd = 'VM is not running.';
+					$stat_cmd = 'VM is not running.';
 				}
 				break;
 
 			case 'vcpu':
 				if ($libVirt->vm_is_active($_SESSION['active_vm'])) {
-					$ajax_cmd = print_r($libVirt->get_vm_cpu_stats($_SESSION['active_vm']), true);
+					$stat_cmd = print_r($libVirt->get_vm_cpu_stats($_SESSION['active_vm']), true);
 				}
 				else {
-					// $ajax_cmd = 'VM is not running.';
-					$ajax_cmd  = 'VM is not running.' . PHP_EOL;
-					$ajax_cmd .= print_r($libVirt->get_vm_cpu_stats($_SESSION['active_vm']), true);
+					// $stat_cmd = 'VM is not running.';
+					$stat_cmd  = 'VM is not running.' . PHP_EOL;
+					$stat_cmd .= print_r($libVirt->get_vm_cpu_stats($_SESSION['active_vm']), true);
 				}
 				break;
 
 			case 'vdsk':
 				if ($libVirt->vm_is_active($_SESSION['active_vm'])) {
-					$ajax_cmd = print_r($libVirt->get_vm_disk_stats($_SESSION['active_vm']), true);
+					$stat_cmd = print_r($libVirt->get_vm_disk_stats($_SESSION['active_vm']), true);
 				}
 				else {
-					// $ajax_cmd = 'VM is not running.';
-					$ajax_cmd  = 'VM is not running.' . PHP_EOL;
-					$ajax_cmd .= print_r($libVirt->get_vm_disk_stats($_SESSION['active_vm']), true);
+					// $stat_cmd = 'VM is not running.';
+					$stat_cmd  = 'VM is not running.' . PHP_EOL;
+					$stat_cmd .= print_r($libVirt->get_vm_disk_stats($_SESSION['active_vm']), true);
 				}
 				break;
 
 			case 'vmem':
 				if ($libVirt->vm_is_active($_SESSION['active_vm'])) {
-					// $ajax_cmd = $libVirt->virsh_shell_exec('dommemstat ' . $_SESSION['active_vm']);
-					$ajax_cmd = print_r($libVirt->get_vm_mem_stats($_SESSION['active_vm']), true);
+					// $stat_cmd = $libVirt->virsh_shell_exec('dommemstat ' . $_SESSION['active_vm']);
+					$stat_cmd = print_r($libVirt->get_vm_mem_stats($_SESSION['active_vm']), true);
 				}
 				else {
-					// $ajax_cmd = 'VM is not running.';
-					$ajax_cmd  = 'VM is not running.' . PHP_EOL;
-					$ajax_cmd .= print_r($libVirt->get_vm_mem_stats($_SESSION['active_vm']), true);
+					// $stat_cmd = 'VM is not running.';
+					$stat_cmd  = 'VM is not running.' . PHP_EOL;
+					$stat_cmd .= print_r($libVirt->get_vm_mem_stats($_SESSION['active_vm']), true);
 				}
 				break;
 
 			case 'vnet':
 				if ($libVirt->vm_is_active($_SESSION['active_vm'])) {
-					$ajax_cmd = print_r($libVirt->get_vm_net_stats($_SESSION['active_vm']), true);
+					$stat_cmd = print_r($libVirt->get_vm_net_stats($_SESSION['active_vm']), true);
 				}
 				else {
-					$ajax_cmd = 'VM is not running.';
+					$stat_cmd = 'VM is not running.';
 				}
 				break;
 
 			case 'vhost':
-				$ajax_cmd = $libVirt->virsh_shell_exec('domstats --raw ' . $_SESSION['active_vm']);
+				$stat_cmd = $libVirt->virsh_shell_exec('domstats --raw ' . $_SESSION['active_vm']);
 				break;
 		}
 
 		// Prepare ajax response
-		$ajax_response = new stdClass;
-		$ajax_response->html  = '';
-		$ajax_response->html .= $ajax_cmd;
-		$ajax_response->success = (!is_null($ajax_cmd) ? true : false);
+		$ajax_response = $libVirt->ajax_response($stat_cmd);
 		
 		// Send ajax response as JSON
 		$libVirt->send_json($ajax_response, true);
@@ -339,13 +414,13 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 					<ul class="right hide-on-med-and-down">
 						<li><a href="?module=dsh" class="tooltipped" data-position="bottom" data-tooltip="Show dashboard"><i class="material-icons left">dashboard</i>Dashboard</a></li>
 						<li><a href="./" class="tooltipped" data-position="bottom" data-tooltip="Show modules"><i class="material-icons left">apps</i>Modules</a></li>
-						<li><a href="#modal_help" class="tooltipped modal-trigger" data-position="bottom" data-html="true" data-tooltip="Display &lt;strong&gt;virsh&lt;/strong&gt; commands"><i class="material-icons left">help_outline</i>Help</a></li>
+						<li><a href="#modal-help" class="tooltipped modal-trigger" data-position="bottom" data-html="true" data-tooltip="Display &lt;strong&gt;virsh&lt;/strong&gt; commands"><i class="material-icons left">help_outline</i>Help</a></li>
 						<li><a href="#!" onclick="window.location.reload();" class="tooltipped" data-position="bottom" data-tooltip="Refresh"><i class="material-icons left">refresh</i>Refresh</a></li>
 						<li><a href="#!" class="dropdown-button" data-activates="settings-dropdown" data-hover="false" data-alignment="right" data-belowOrigin="true"><i class="material-icons left">settings</i>Settings<i class="material-icons right">arrow_drop_down</i></a></li>
 					</ul>
 					<ul id="settings-dropdown" class="dropdown-content">
 						<li><a href="#!" class="display-expand"><i class="material-icons left">swap_horiz</i>Expand display</a></li>
-						<li><a href="#!"><i class="material-icons left">settings_ethernet</i>Connection</a></li>
+						<li><a href="#modal-connect" class="modal-trigger"><i class="material-icons left">settings_ethernet</i>Connection</a></li>
 						<li class="divider"></li>
 						<li><a href="#!">Other</a></li>
 					</ul>
@@ -361,7 +436,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 									<div class="collapsible-body">
 										<ul>
 											<li><a href="#!" class="display-expand"><i class="material-icons left">swap_horiz</i>Expand display</a></li>
-											<li><a href="#!"><i class="material-icons left">settings_ethernet</i>Connection</a></li>
+											<li><a href="#modal-connect" class="modal-trigger"><i class="material-icons left">settings_ethernet</i>Connection</a></li>
 											<li><a href="#!">Other</a></li>
 										</ul>
 									</div>
@@ -543,7 +618,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 	</footer>
 
 	<!-- Modals -->
-	<div id="modal_help" class="modal modal-fixed-footer">
+	<div id="modal-help" class="modal modal-fixed-footer">
 		<div class="modal-content grey-text text-darken-3">
 			<h4>Command list</h4>
 			<pre><?php
@@ -554,6 +629,50 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 			<a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>
 		</div>
 	</div>
+	<div id="modal-connect" class="modal">
+		<div class="modal-content grey-text text-darken-3">
+			<h4 style="margin-bottom: 0;">Connection</h4>
+			<div class="row">
+				<form class="col s12" id="connectForm">
+					<p class="flow-text">Select a connection mode:</p>
+					<div class="row">
+						<div class="col s4">
+							<p>
+								<input class="with-gap" name="connect-mode" type="radio" id="connect-mode-system" checked />
+								<label for="connect-mode-system">System</label>
+							</p>
+						</div>
+						<div class="col s4">
+							<p>
+								<input class="with-gap" name="connect-mode" type="radio" id="connect-mode-session" />
+								<label for="connect-mode-session">Session</label>
+							</p>
+						</div>
+						<div class="col s4">
+							<p>
+								<input class="with-gap" name="connect-mode" type="radio" id="connect-mode-ssh" />
+								<label for="connect-mode-ssh">SSH</label>
+							</p>
+						</div>
+					</div>
+					<div id="connect-ssh" class="row" style="display: none;">
+						<div class="input-field col s6">
+							<input id="connect-user" type="text" class="validate" autofocus required>
+							<label for="connect-user">User</label>
+						</div>
+						<div class="input-field col s6">
+							<input id="connect-host" type="text" class="validate" required>
+							<label for="connect-host">Host</label>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat red-text text-accent-3">Cancel</a>
+			<a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text text-accent-3">Connect</a>
+		</div>
+	</div>
 
 	<!-- Import jQuery before materialize.js -->
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -562,12 +681,14 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 	<!-- App JS -->
 	<script type="text/javascript">
 	<?php
-	echo file_get_contents(__DIR__ . '/libvirt.js');
-	?></script>
+	echo file_get_contents(__DIR__ . '/libvirt.js') . PHP_EOL;
+	?>
+	</script>
 	<script type="text/javascript">
 	<?php
-	echo file_get_contents(__DIR__ . '/libvirt.ui.js');
-	?></script>
+	echo file_get_contents(__DIR__ . '/libvirt.ui.js') . PHP_EOL;
+	?>
+	</script>
 
 	<!-- Connection -->
 	<?php

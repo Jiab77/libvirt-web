@@ -31,6 +31,20 @@ $(document).ready(function() {
 		complete: function(modal) { // Callback for Modal close
 			console.group('Modal');
 			console.info('Modal close.', modal);
+
+			// Code for hypervisor connection
+			if (modal[0].id === 'modal-connect') {
+				var $user = $('#connect-user'),
+					$host = $('#connect-host');
+				
+				if ($user.hasClass('valid') && $host.hasClass('valid')) {
+					console.log('do remote connection!', $user, $host);
+				}
+				else {
+					console.log('do local connection.');
+				}
+			}
+
 			console.groupEnd();
 		}
 	});
@@ -45,6 +59,25 @@ $(document).ready(function() {
 	});
 	$('#uploadForm').on('submit', function(event) {
 		event.preventDefault();
+	});
+	$('#connectForm').on('submit', function(event) {
+		event.preventDefault();
+	});
+	$('input[name="connect-mode"]').on('change', function(event) {
+		var $connector = $('#connect-ssh');
+		if (event.target.id === 'connect-mode-ssh') {
+			console.log('Connect mode "ssh" selected.', event, $connector);
+			if (event.target.checked === true) {
+				console.log('Show input field.');
+				$connector.show('slow');
+			}
+		}
+		else {
+			if ($connector && $connector.is(':visible') === true) {
+				console.log('Hide input field.');
+				$connector.hide('slow');
+			}
+		}
 	});
 
 	// Parse client query
