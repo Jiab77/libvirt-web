@@ -117,16 +117,41 @@ class libVirt {
 			}
 		}
 	}
+	public function exec_notify($command, &$output, &$return_code) {
+		$run_command = escapeshellcmd($command);
+		$redirector = '2>&1';
+		exec($run_command . ' ' . $redirector, $output, $return_code);
+		foreach ($output as $line) {
+			if (!empty($line)) {
+				if (strpos($line, 'error:') !== false) {
+					$this->add_notification($line, true);
+				}
+				else {
+					$this->add_notification($line);
+				}
+			}
+		}
+	}
+	public function notify($message, $error = false) {
+		if (!empty($message)) {
+			if ($error !== false) {
+				$this->add_notification($message, true);
+			}
+			else {
+				$this->add_notification($message);
+			}
+		}
+	}
 	public function virsh_passthru($command, &$return_code = null) {
 		$base_command = 'virsh';
 		$run_command = escapeshellcmd($base_command . ' ' . $command);
 		$redirector = '2>&1';
 		passthru($run_command . ' ' . $redirector, $return_code);
 	}
-	public function virsh_connect($uri = 'qemu:///system') {
+	public function virsh_connect($uri = 'qemu:///system', $read_only = false) {
 		$output = null;
 		$return_code = null;
-		$this->virsh_exec('connect --name ' . $uri, $output, $return_code);
+		$this->virsh_exec('connect --name ' . $uri . ($read_only === true ? ' --readonly' : ''), $output, $return_code);
 		if ($return_code !== 0) {
 			$_SESSION['connected'] = false;
 			$this->add_notification('Could not connect to the hypervisor.', true);
@@ -134,8 +159,8 @@ class libVirt {
 		else {
 			$_SESSION['connected'] = true;
 			$this->add_notification('Connected to the hypervisor.');
-			$this->add_notification('Connection URI: ' . $uri);
 		}
+		$this->add_notification('Connection URI: ' . $uri);
 		return $_SESSION['connected'];
 	}
 
@@ -438,6 +463,12 @@ class libVirt {
 	
 		return (count($vm_pools) > 0 ? $vm_pools : false);
 	}
+	public function get_vm_uid($vm_name) {
+		if (!$vm_name) {
+			return false;
+		}
+		return $this->virsh_shell_exec('domuuid ' . $vm_name);
+	}
 	public function get_vm_state($vm_name) {
 		if (!$vm_name) {
 			return false;
@@ -693,9 +724,33 @@ class libVirt {
 						}
 						echo '</td>' . PHP_EOL;
 						echo '<td>' . PHP_EOL;
-						echo '<a href="?module=' . $_SESSION['module'] . '&action=save&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Create snapshot"><i class="material-icons">save</i></a>' . PHP_EOL;
+						echo '<a href="?module=' . $_SESSION['module'] . '&action=snap&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Create snapshot"><i class="material-icons">save</i></a>' . PHP_EOL;
 						echo '<a href="?module=' . $_SESSION['module'] . '&action=edit&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Edit"><i class="material-icons">edit</i></a>' . PHP_EOL;
-						echo '<a href="?module=' . $_SESSION['module'] . '&action=del&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Delete"><i class="material-icons">delete</i></a>' . PHP_EOL;
+						echo '<a href="?module=' . $_SESSION['module'] . '&action=delete&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Delete"><i class="material-icons">delete</i></a>' . PHP_EOL;
+						echo '<a href="#more-action-modal-vm_' . $this->get_vm_uid($vm_name) . '" class="modal-trigger tooltipped" data-position="bottom" data-tooltip="More actions"><i class="material-icons">more_vert</i></a>' . PHP_EOL;
+
+						// Created dedicated VM modal
+						echo '<div id="more-action-modal-vm_' . $this->get_vm_uid($vm_name) . '" class="modal bottom-sheet">' . PHP_EOL;
+						echo '<div class="modal-content">' . PHP_EOL;
+						echo '<h4>' . $vm_name . ' - advanced</h4>' . PHP_EOL;
+						echo '<div class="row">' . PHP_EOL;
+						echo '<div class="col s6">' . PHP_EOL;
+						echo '<ul>' . PHP_EOL;
+						echo '<li><a href="?module=' . $_SESSION['module'] . '&action=clone&name=' . $vm_name . '" class="tooltipped" data-position="right" data-tooltip="Clone the VM"><i class="material-icons">save</i> Clone</a></li>' . PHP_EOL;
+						echo '<li><a href="?module=' . $_SESSION['module'] . '&action=prep&name=' . $vm_name . '" class="tooltipped" data-position="right" data-tooltip="Clean the cloned guest"><i class="material-icons">refresh</i> SysPrep</a></li>' . PHP_EOL;
+						echo '</ul>' . PHP_EOL;
+						echo '</div>' . PHP_EOL;
+						echo '<div class="col s6">' . PHP_EOL;
+						echo '<p>GRAPH</p>' . PHP_EOL;
+						echo '</div>' . PHP_EOL;
+						echo '</div>' . PHP_EOL;
+						echo '</div>' . PHP_EOL;
+						echo '<div class="modal-footer">' . PHP_EOL;
+						echo '<a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>' . PHP_EOL;
+						echo '</div>' . PHP_EOL;
+						echo '</div>' . PHP_EOL;
+
+						// Closing table cell
 						echo '</td>' . PHP_EOL;
 					}
 	
@@ -726,7 +781,23 @@ class libVirt {
 		return $is_active;
 	}
 
+	public function vm_is_paused($vm_name) {
+		$is_paused = false;
+		$vm_state = $this->get_vm_state($vm_name);
+		if ($vm_state === 'paused') {
+			$is_paused = true;
+		}
+		return $is_paused;
+	}
+
 	// Ajax data
+	public function ajax_response($data) {
+		$response = new stdClass;
+		$response->html  = '';
+		$response->html .= $data;
+		$response->success = (!is_null($data) ? true : false);
+		return $response;
+	}
 	public function send_json($data, $formatted = false) {
 		header('Content-Type: application/json');
 		if ($formatted === true) {
