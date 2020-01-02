@@ -53,15 +53,21 @@ function uploadFile(file){
 }
 function updateProgress(event) {
 	console.log('Progress Event:', event);
+
+	// Progress bar elements
 	var progressBarContainer = document.getElementById("uploadProgress"),
 		progressBar = document.getElementById("progressValue"),
 		progressStatus = document.getElementById("uploadStatus");
 
+	// Progress bar status
 	progressStatus.innerHTML = 'Uploading...';
 
+	// Progress bar display
 	if (progressBarContainer.style.display === 'none') {
 		progressBarContainer.style.display = 'block';
 	}
+
+	// Compute progress bar data
 	if (event.lengthComputable) {
 		var percentComplete = Math.ceil(event.loaded / event.total * 100);
 
@@ -75,6 +81,8 @@ function updateProgress(event) {
 			console.log('Progress: Finished.');
 		}
 	}
+
+	// Failed to compute data
 	else {
 		// Unable to compute progress information since the total size is unknown
 		progressBarContainer.style.display = 'none';
@@ -136,6 +144,7 @@ function refreshStats(type, response) {
 				$('#vhost-stats').text(response.html);
 				break;
 		}
+		return true;
 	}
 	else {
 		return false;
