@@ -21,7 +21,7 @@ The web interface should be able to run on desktops and servers.
 
 ## Dependencies
 
-There is only few dependencies required, you will need at least five packages:
+There is only few dependencies required, you will need at least six packages:
 
  1. `libvirt-bin` (The `virsh` command should be provided by [libVirt](https://libvirt.org/))
  2. `virt-viewer`
