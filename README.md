@@ -26,8 +26,9 @@ There is only few dependencies required, you will need at least five packages:
  1. `libvirt-bin` (The `virsh` command should be provided by [libVirt](https://libvirt.org/))
  2. `virt-viewer`
  3. `php-cli`
- 4. `php-xml`
- 5. `php-json`
+ 4. `php-gd`
+ 5. `php-xml`
+ 6. `php-json`
 
 > I have dropped the ImageMagick `convert` command from dependencies.
 
