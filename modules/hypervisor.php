@@ -37,7 +37,7 @@
 			<div class="col s6 m4 l3">
 				<div class="card-panel hoverable">
 					<p class="flow-text center-align">
-						<a href="#modal_upload" class="modal-trigger">
+						<a href="#modal-upload" class="modal-trigger">
 							<i class="material-icons">storage</i>
 							<br><span class="truncate">Upload Images</span>
 						</a>
@@ -61,7 +61,7 @@
 </div>
 
 <!-- Modals -->
-<div id="modal_upload" class="modal modal-fixed-footer">
+<div id="modal-upload" class="modal modal-fixed-footer">
 	<div class="modal-content grey-text text-darken-3">
 		<h4>Upload Files</h4>
 		<div class="row">
