@@ -2,16 +2,16 @@
 <!-- Module -->
 <div class="row">
 	<div class="col s12">
-		<!-- <h3>VM Details</h3> -->
+		<h3>Details</h3>
 		<div class="row">
 			<div class="col s7">
-				<h3>Summary</h3>
+				<h5>Summary</h5>
 				<pre><?php
 				$libVirt->virsh_passthru('dominfo ' . $selected_vm);
 				?></pre>
 			</div>
 			<div class="col s5">
-				<h3>Hypervisor</h3>
+				<h5>Hypervisor</h5>
 				<pre id="vhostcpu-stats" style="height: 300px;"><?php
 				if ($libVirt->vm_is_active($selected_vm)) {
 					$libVirt->virsh_passthru('cpu-stats ' . $selected_vm);
@@ -81,6 +81,8 @@
 				?></pre> -->
 			</div>
 		</div>
+
+		<?php /*
 		<h3>
 			Virtual CPU's
 			<i class="material-icons tooltipped light-blue-text text-darken-1" style="cursor: pointer;" data-position="right" data-tooltip="View CPU Stats" onclick="$('#modal-cpu-stats').modal('open');">info_outline</i>
@@ -99,7 +101,10 @@
 				<a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>
 			</div>
 		</div>
-		<h3>Network Interfaces</h3>
+		*/ ?>
+
+		<h3>Network</h3>
+		<h5>Interfaces</h5>
 		<table class="striped responsive-table">
 			<thead>
 				<tr>
@@ -124,12 +129,12 @@
 
 			</tbody>
 		</table>
-		<h5>Raw data</h5>
+		<h6>Raw data</h6>
 		<pre><?php
 		print_r($output_ifaces);
 		var_dump($ret_ifaces);
 		?></pre>
-		<h3>Network Addresses</h3>
+		<h5>Addresses</h5>
 		<pre><?php
 		if ($selected_vm === 'ceph-admin') {
 			$libVirt->virsh_passthru('domifaddr ' . $selected_vm . ' --interface vnet0');
@@ -160,7 +165,7 @@
 
 			</tbody>
 		</table>
-		<!-- <h5>Raw data</h5>
+		<!-- <h6>Raw data</h6>
 		<pre><?php
 		print_r($output_devs);
 		var_dump($ret_devs);
@@ -188,7 +193,7 @@
 
 			</tbody>
 		</table>
-		<h5>Raw data</h5>
+		<h6>Raw data</h6>
 		<pre><?php
 		print_r($output_snaps);
 		var_dump($ret_snaps);

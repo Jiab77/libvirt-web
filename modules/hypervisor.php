@@ -51,7 +51,7 @@
 				<pre style="height: 300px;"><?php
 				print_r($libVirtXML->xml2json($libVirt->virsh_shell_exec('sysinfo'), false, true));
 				?></pre>
-				<h5>Raw data</h5>
+				<h6>Raw data</h6>
 				<pre style="height: 300px;"><?php
 				echo htmlentities($libVirt->virsh_shell_exec('sysinfo'));
 				?></pre>

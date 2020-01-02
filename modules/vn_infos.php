@@ -30,7 +30,7 @@
 			</tbody>
 		</table>
 		<blockquote>Network &ldquo;<?php echo $network; ?>&rdquo;</blockquote>
-		<!-- <h5>Raw data</h5>
+		<!-- <h6>Raw data</h6>
 		<pre><?php
 		print_r($output_ips);
 		var_dump($ret_ips);

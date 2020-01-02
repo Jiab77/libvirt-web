@@ -29,13 +29,13 @@
 				</tr>
 			</tfoot>
 		</table>
-		<!-- <h5>Raw data</h5>
+		<!-- <h6>Raw data</h6>
 		<pre><?php
 		print_r($output_vms);
 		var_dump($ret_vms);
 		?></pre> -->
 		<?php if (isset($action, $output_action, $ret_action) && !empty($output_action)): ?>
-		<h5>Raw data</h5>
+		<h6>Raw data</h6>
 		<pre><?php
 		print_r($output_action);
 		var_dump($ret_action);
@@ -73,7 +73,7 @@
 			</tbody>
 		</table>
 		<blockquote>Network &ldquo;<?php echo $network; ?>&rdquo;</blockquote>
-		<!-- <h5>Raw data</h5>
+		<!-- <h6>Raw data</h6>
 		<pre><?php
 		print_r($output_ips);
 		var_dump($ret_ips);
