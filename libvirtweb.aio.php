@@ -1021,7 +1021,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 					<ul class="right hide-on-med-and-down">
 						<li><a href="?module=dsh" class="tooltipped" data-position="bottom" data-tooltip="Show dashboard"><i class="material-icons left">dashboard</i>Dashboard</a></li>
 						<li><a href="./" class="tooltipped" data-position="bottom" data-tooltip="Show modules"><i class="material-icons left">apps</i>Modules</a></li>
-						<li><a href="#modal_help" class="tooltipped modal-trigger" data-position="bottom" data-html="true" data-tooltip="Display &lt;strong&gt;virsh&lt;/strong&gt; commands"><i class="material-icons left">help_outline</i>Help</a></li>
+						<li><a href="#modal-help" class="tooltipped modal-trigger" data-position="bottom" data-html="true" data-tooltip="Display &lt;strong&gt;virsh&lt;/strong&gt; commands"><i class="material-icons left">help_outline</i>Help</a></li>
 						<li><a href="#!" onclick="window.location.reload();" class="tooltipped" data-position="bottom" data-tooltip="Refresh"><i class="material-icons left">refresh</i>Refresh</a></li>
 						<li><a href="#!" class="dropdown-button" data-activates="settings-dropdown" data-hover="false" data-alignment="right" data-belowOrigin="true"><i class="material-icons left">settings</i>Settings<i class="material-icons right">arrow_drop_down</i></a></li>
 					</ul>
@@ -1192,13 +1192,13 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 									</tr>
 								</tfoot>
 							</table>
-							<!-- <h5>Raw data</h5>
+							<!-- <h6>Raw data</h6>
 							<pre><?php
 							print_r($output_vms);
 							var_dump($ret_vms);
 							?></pre> -->
 							<?php if (isset($_SESSION['action']) && !empty($_SESSION['action'])): ?>
-							<h5>Raw data</h5>
+							<h6>Raw data</h6>
 							<pre><?php
 							if (isset($output_action)) {
 								print_r($output_action);
@@ -1228,7 +1228,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 
 								</tbody>
 							</table>
-							<!-- <h5>Raw data</h5>
+							<!-- <h6>Raw data</h6>
 							<pre><?php
 							print_r($output_ips);
 							var_dump($ret_ips);
@@ -1294,7 +1294,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 									<pre style="height: 300px;"><?php
 									print_r(xml2json(virsh_shell_exec('sysinfo'), false, true));
 									?></pre>
-									<h5>Raw data</h5>
+									<h6>Raw data</h6>
 									<pre style="height: 300px;"><?php
 									echo htmlentities(virsh_shell_exec('sysinfo'));
 									?></pre>
@@ -1488,13 +1488,13 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 
 								</tbody>
 							</table>
-							<!-- <h5>Raw data</h5>
+							<!-- <h6>Raw data</h6>
 							<pre><?php
 							print_r($output_vms);
 							var_dump($ret_vms);
 							?></pre> -->
 							<?php if (isset($_SESSION['action'], $output_action, $ret_action) && !empty($output_action)): ?>
-							<h5>Raw data</h5>
+							<h6>Raw data</h6>
 							<pre><?php
 							print_r($output_action);
 							var_dump($ret_action);
@@ -1522,7 +1522,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 
 								</tbody>
 							</table>
-							<!-- <h5>Raw data</h5>
+							<!-- <h6>Raw data</h6>
 							<pre><?php
 							print_r($output_ips);
 							var_dump($ret_ips);
@@ -1559,7 +1559,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 
 								</tbody>
 							</table>
-							<!-- <h5>Raw data</h5>
+							<!-- <h6>Raw data</h6>
 							<pre><?php
 							print_r($output_vns);
 							var_dump($ret_vns);
@@ -1586,7 +1586,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 
 								</tbody>
 							</table>
-							<!-- <h5>Raw data</h5>
+							<!-- <h6>Raw data</h6>
 							<pre><?php
 							print_r($output_ips);
 							var_dump($ret_ips);
@@ -1609,7 +1609,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 
 								</tbody>
 							</table>
-							<!-- <h5>Raw data</h5>
+							<!-- <h6>Raw data</h6>
 							<pre><?php
 							print_r($output_vnfs);
 							var_dump($ret_vnfs);
@@ -1646,7 +1646,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 
 								</tbody>
 							</table>
-							<!-- <h5>Raw data</h5>
+							<!-- <h6>Raw data</h6>
 							<pre><?php
 							print_r($output_ips);
 							var_dump($ret_ips);
@@ -1679,7 +1679,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 
 								</tbody>
 							</table>
-							<!-- <h5>Raw data</h5>
+							<!-- <h6>Raw data</h6>
 							<pre><?php
 							print_r($output_vsv);
 							var_dump($ret_vsv);
@@ -1713,7 +1713,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 
 								</tbody>
 							</table>
-							<!-- <h5>Raw data</h5>
+							<!-- <h6>Raw data</h6>
 							<pre><?php
 							print_r($output_vsp);
 							var_dump($ret_vsp);
@@ -1736,7 +1736,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 
 								</tbody>
 							</table>
-							<!-- <h5>Raw data</h5>
+							<!-- <h6>Raw data</h6>
 							<pre><?php
 							print_r($output_vsv);
 							var_dump($ret_vsv);
@@ -1817,7 +1817,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 	</footer>
 
 	<!-- Modals -->
-	<div id="modal_help" class="modal modal-fixed-footer">
+	<div id="modal-help" class="modal modal-fixed-footer">
 		<div class="modal-content grey-text text-darken-3">
 			<h4>Command list</h4>
 			<pre><?php
