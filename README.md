@@ -42,7 +42,7 @@ It is also tested on FreeBSD by my friend [@Sevendogs5](https://twitter.com/Seve
 You should only need to install these packages:
 
 ```bash
-sudo apt install libvirt-bin virt-viewer php-cli php-xml php-json
+sudo apt install libvirt-bin virt-viewer php-cli php-gd php-xml php-json
 ```
 
 > I still need to validate the packages list so this might change later.
@@ -61,7 +61,7 @@ You can start the server that way:
 
 ```bash
 cd libvirt-web
-php -S localhost:8000 libvirt-web.php
+php -S localhost:8000 libvirtweb.php
 ```
 
 > `sudo` is not required to run the server. It is required only if you want to run the server on a port below **1024**.
