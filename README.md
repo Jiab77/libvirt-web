@@ -21,14 +21,15 @@ The web interface should be able to run on desktops and servers.
 
 ## Dependencies
 
-There is only few dependencies required, you will need at least six packages:
+There is only few dependencies required:
 
- 1. `libvirt-bin` (The `virsh` command should be provided by [libVirt](https://libvirt.org/))
- 2. `virt-viewer`
- 3. `php-cli`
- 4. `php-gd`
- 5. `php-xml`
- 6. `php-json`
+1. `libvirt-bin` (The `virsh` command should be provided by [libVirt](https://libvirt.org/))
+2. `virt-viewer`
+3. `libguestfs`
+4. `php-cli`
+5. `php-gd`
+6. `php-xml`
+7. `php-json`
 
 > I have dropped the ImageMagick `convert` command from dependencies.
 
@@ -43,7 +44,7 @@ It is also tested on FreeBSD by my friend [@Sevendogs5](https://twitter.com/Seve
 You should only need to install these packages:
 
 ```bash
-sudo apt install libvirt-bin virt-viewer php-cli php-gd php-xml php-json
+sudo apt install libvirt-bin virt-viewer libguestfs php-cli php-gd php-xml php-json
 ```
 
 > I still need to validate the packages list so this might change later.
