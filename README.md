@@ -1,12 +1,14 @@
 # libVirt Web
 
-A simple web interface based on libVirt and PHP.
+A simple web interface based on [libVirt](https://libvirt.org/) and [PHP](https://www.php.net/).
 
 > This project is still a **Work In Progress**, it might not work correctly on your side.
 >
 > Please, create an issue in this case so I can track and fix it.
 >
 > Thank you.
+
+_If you were looking for a `nodejs` version: <https://github.com/Jiab77/libvirt-web-nodejs>._
 
 ## Preview
 
