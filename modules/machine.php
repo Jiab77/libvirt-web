@@ -28,11 +28,11 @@
 				<h5>CPU</h5>
 				<pre id="vcpu-stats" style="height: 300px;"><?php
 				if ($libVirt->vm_is_active($selected_vm)) {
-					print_r($libVirt->get_vm_cpu_stats($selected_vm));
+					print_r($libVirt->get_vm_stats($selected_vm, 'cpu'));
 				}
 				else {
 					echo 'VM is not running.' . PHP_EOL;
-					print_r($libVirt->get_vm_cpu_stats($selected_vm));
+					print_r($libVirt->get_vm_stats($selected_vm, 'cpu'));
 				}
 				?></pre>
 			</div>
@@ -41,11 +41,11 @@
 				<pre id="vmem-stats" style="height: 300px;"><?php
 				if ($libVirt->vm_is_active($selected_vm)) {
 					// $libVirt->virsh_passthru('dommemstat ' . $selected_vm);
-					print_r($libVirt->get_vm_mem_stats($selected_vm));
+					print_r($libVirt->get_vm_stats($selected_vm, 'memory'));
 				}
 				else {
 					echo 'VM is not running.' . PHP_EOL;
-					print_r($libVirt->get_vm_mem_stats($selected_vm));
+					print_r($libVirt->get_vm_stats($selected_vm, 'memory'));
 				}
 				?></pre>
 			</div>
@@ -53,7 +53,7 @@
 				<h5>Network</h5>
 				<pre id="vnet-stats" style="height: 300px;"><?php
 				if ($libVirt->vm_is_active($selected_vm)) {
-					print_r($libVirt->get_vm_net_stats($selected_vm));
+					print_r($libVirt->get_vm_stats($selected_vm, 'network'));
 				}
 				else {
 					echo 'VM is not running.' . PHP_EOL;
@@ -64,7 +64,7 @@
 				<h5>Disk</h5>
 				<pre id="vdsk-stats" style="height: 300px;"><?php
 				if ($libVirt->vm_is_active($selected_vm)) {
-					print_r($libVirt->get_vm_disk_stats($selected_vm));
+					print_r($libVirt->get_vm_stats($selected_vm, 'disk'));
 				}
 				else {
 					echo 'VM is not running.' . PHP_EOL;
@@ -121,7 +121,7 @@
 			// $libVirt->virsh_passthru('domiflist ' . $selected_vm);
 
 			$output_ifaces = ''; $ret_ifaces = '';
-			$libVirt->virsh_exec('domiflist ' . $selected_vm, $output_ifaces, $ret_ifaces);
+			$libVirt->virsh_exec('domiflist --domain ' . $selected_vm, $output_ifaces, $ret_ifaces);
 			if (isset($output_ifaces) && !empty($output_ifaces)) {
 				$libVirt->create_table_generic_rows($output_ifaces, '  ', 5, 'center-align');
 			}
@@ -132,21 +132,24 @@
 		<h6>Raw data</h6>
 		<pre><?php
 		print_r($output_ifaces);
+		$parsed_iface = explode('      ', $output_ifaces[2])[0];
 		var_dump($ret_ifaces);
 		?></pre>
 		<h5>Addresses</h5>
 		<pre><?php
-		if ($selected_vm === 'ceph-admin') {
-			$libVirt->virsh_passthru('domifaddr ' . $selected_vm . ' --interface vnet0');
+		if ($libVirt->vm_is_active($selected_vm) && $parsed_iface !== '') {
+			$libVirt->virsh_passthru('domifaddr --domain ' . $selected_vm . ' --interface ' . $parsed_iface);
 		}
 		else {
-			echo 'Not written yet...' . PHP_EOL;
+			echo 'VM is not running.' . PHP_EOL;
 		}
 		?></pre>
 		<h3>Attached devices</h3>
 		<table class="striped responsive-table">
 			<thead>
 				<tr>
+					<th>Type</th>
+					<th>Device</th>
 					<th>Target</th>
 					<th>Source</th>
 				</tr>
@@ -154,12 +157,10 @@
 			<tbody>
 
 			<?php
-			// $libVirt->virsh_passthru('domblklist ' . $selected_vm);
-
 			$output_devs = ''; $ret_devs = '';
-			$libVirt->virsh_exec('domblklist ' . $selected_vm, $output_devs, $ret_devs);
+			$libVirt->virsh_exec('domblklist --details --domain ' . $selected_vm, $output_devs, $ret_devs);
 			if (isset($output_devs) && !empty($output_devs)) {
-				$libVirt->create_table_generic_rows($output_devs, '  ', 2, 'center-align');
+				$libVirt->create_table_generic_rows($output_devs, '  ', 4, 'center-align');
 			}
 			?>
 
@@ -185,7 +186,7 @@
 			// $libVirt->virsh_passthru('snapshot-list ' . $selected_vm);
 
 			$output_snaps = ''; $ret_snaps = '';
-			$libVirt->virsh_exec('snapshot-list ' . $selected_vm, $output_snaps, $ret_snaps);
+			$libVirt->virsh_exec('snapshot-list --domain ' . $selected_vm, $output_snaps, $ret_snaps);
 			if (isset($output_snaps) && !empty($output_snaps)) {
 				$libVirt->create_table_generic_rows($output_snaps, '  ', 3, 'center-align');
 			}
@@ -201,7 +202,7 @@
 		<h3>Running Jobs</h3>
 		<pre><?php
 		if ($libVirt->vm_is_active($selected_vm)) {
-			$libVirt->virsh_passthru('domjobinfo ' . $selected_vm);
+			$libVirt->virsh_passthru('domjobinfo --domain ' . $selected_vm);
 		}
 		else {
 			echo 'VM is not running.' . PHP_EOL;
