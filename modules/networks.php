@@ -16,7 +16,7 @@
 
 			<?php
 			$output_vns = ''; $ret_vns = '';
-			exec('virsh net-list', $output_vns, $ret_vns);
+			exec('virsh net-list --all', $output_vns, $ret_vns);
 			if (isset($output_vns) && !empty($output_vns)) {
 				$libVirt->create_table_generic_rows($output_vns, '  ', 4, 'center-align');
 			}
