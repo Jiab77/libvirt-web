@@ -9,15 +9,19 @@
 					<th>Name</th>
 					<th>State</th>
 					<th>Autostart</th>
+					<th>Persistent</th>
+					<th>Capacity</th>
+					<th>Allocation</th>
+					<th>Available</th>
 				</tr>
 			</thead>
 			<tbody>
 
 			<?php
 			$output_vsp = ''; $ret_vsp = '';
-			exec('virsh pool-list', $output_vsp, $ret_vsp);
+			exec('virsh pool-list --all --details', $output_vsp, $ret_vsp);
 			if (isset($output_vsp) && !empty($output_vsp)) {
-				$libVirt->create_table_generic_rows($output_vsp, '  ', 3, 'center-align');
+				$libVirt->create_table_generic_rows($output_vsp, '  ', 7, 'center-align');
 			}
 			?>
 
@@ -38,15 +42,18 @@
 				<tr>
 					<th>Name</th>
 					<th>Path</th>
+					<th>Type</th>
+					<th>Capacity</th>
+					<th>Allocation</th>
 				</tr>
 			</thead>
 			<tbody>
 
 			<?php
 			$output_vsv = ''; $ret_vsv = '';
-			exec('virsh vol-list default', $output_vsv, $ret_vsv);
+			exec('virsh vol-list --details --pool default', $output_vsv, $ret_vsv);
 			if (isset($output_vsv) && !empty($output_vsv)) {
-				$libVirt->create_table_generic_rows($output_vsv, ' ', 2, 'center-align');
+				$libVirt->create_table_generic_rows($output_vsv, ' ', 5, 'center-align');
 			}
 			?>
 
