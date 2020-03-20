@@ -1,6 +1,6 @@
 # libVirt Web
 
-A simple web interface based on libVirt.
+A simple web interface based on libVirt and PHP.
 
 > This project is still a **Work In Progress**, it might not work correctly on your side.
 >
