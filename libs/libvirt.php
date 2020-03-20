@@ -109,36 +109,11 @@ class libVirt {
 		foreach ($output as $line) {
 			if (!empty($line)) {
 				if (strpos($line, 'error:') !== false) {
-					$this->add_notification($line, true);
+					$this->notify($line, true);
 				}
 				else {
-					$this->add_notification($line);
+					$this->notify($line);
 				}
-			}
-		}
-	}
-	public function exec_notify($command, &$output, &$return_code) {
-		$run_command = escapeshellcmd($command);
-		$redirector = '2>&1';
-		exec($run_command . ' ' . $redirector, $output, $return_code);
-		foreach ($output as $line) {
-			if (!empty($line)) {
-				if (strpos($line, 'error:') !== false) {
-					$this->add_notification($line, true);
-				}
-				else {
-					$this->add_notification($line);
-				}
-			}
-		}
-	}
-	public function notify($message, $error = false) {
-		if (!empty($message)) {
-			if ($error !== false) {
-				$this->add_notification($message, true);
-			}
-			else {
-				$this->add_notification($message);
 			}
 		}
 	}
@@ -154,17 +129,59 @@ class libVirt {
 		$this->virsh_exec('connect --name ' . $uri . ($read_only === true ? ' --readonly' : ''), $output, $return_code);
 		if ($return_code !== 0) {
 			$_SESSION['connected'] = false;
-			$this->add_notification('Could not connect to the hypervisor.', true);
+			$this->notify('Could not connect to the hypervisor.', true);
 		}
 		else {
 			$_SESSION['connected'] = true;
-			$this->add_notification('Connected to the hypervisor.');
+			$this->notify('Connected to the hypervisor.');
 		}
-		$this->add_notification('Connection URI: ' . $uri);
+		$this->notify('Connection URI: ' . $uri);
 		return $_SESSION['connected'];
 	}
 
+	// Other libvirt commands wrapper
+	public function exec_cmd($command, &$output, &$return_code) {
+		$run_command = escapeshellcmd($command);
+		$redirector = '2>&1';
+		exec($run_command . ' ' . $redirector, $output, $return_code);
+	}
+	public function exec_cmd_notify($command, &$output, &$return_code) {
+		$run_command = escapeshellcmd($command);
+		$redirector = '2>&1';
+		exec($run_command . ' ' . $redirector, $output, $return_code);
+		foreach ($output as $line) {
+			if (!empty($line)) {
+				if (strpos($line, 'error:') !== false) {
+					$this->notify($line, true);
+				}
+				else {
+					$this->notify($line);
+				}
+			}
+		}
+	}
+	public function passthru_cmd($command, &$return_code = null) {
+		$run_command = escapeshellcmd($command);
+		$redirector = '2>&1';
+		passthru($run_command . ' ' . $redirector, $return_code);
+	}
+	public function shell_exec_cmd($command) {
+		$run_command = escapeshellcmd($command);
+		$redirector = '2>&1';
+		return trim(shell_exec($run_command . ' ' . $redirector));
+	}
+
 	// Notifications
+	public function notify($message, $error = false) {
+		if (!empty($message)) {
+			if ($error !== false) {
+				$this->add_notification($message, true);
+			}
+			else {
+				$this->add_notification($message);
+			}
+		}
+	}
 	public function add_notification($data, $error = false) {
 		if ($error === false) {
 			$add_status = array_push($_SESSION['notifications']->info, $data);
@@ -291,134 +308,54 @@ class libVirt {
 	}
 
 	// Statistics
-	public function get_vm_cpu_stats($vm_name, $as_json = false, $pretty_print = false) {
-		// Collect data from raw vm stats
-		if ($parsed_data = $this->parse_vm_stats($vm_name)) {
-			$cpu_stats = [];
-		
-			// Clean up vpu data
-			foreach ($parsed_data['vcpu'] as $vcpu) {
-				$vcpu_entry_name = explode('.', $vcpu['name']);
-				if (count($vcpu_entry_name) === 2) {
-					$vcpu_data = ['name' => $vcpu_entry_name[1], 'value' => (is_numeric($vcpu['value']) ? (int)$vcpu['value'] : $vcpu['value'])];
-				}
-				else {
-					$vcpu_data = ['name' => $vcpu['name'], 'value' => (is_numeric($vcpu['value']) ? (int)$vcpu['value'] : $vcpu['value'])];
-				}
-				array_push($cpu_stats, $vcpu_data);
-			}
-	
-			// Output as array or json
-			if ($as_json === true) {
-				if ($pretty_print === true) {
-					$json = json_encode($cpu_stats, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-				}
-				else {
-					$json = json_encode($cpu_stats, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-				}
-				return $json;
-			}
-			else {
-				return $cpu_stats;
-			}
+	public function get_vm_stats($vm_name, $type, $as_json = false, $pretty_print = false) {
+		// Supported types:
+		//  - vcpu (cpu)
+		//  - block (disk)
+		//  - balloon (memory)
+		//  - net (network)
+
+		// Convert from types to raw types
+		$raw_type = '';
+		switch ($type) {
+			case 'cpu': $raw_type = 'vcpu'; break;
+			case 'disk': $raw_type = 'block'; break;
+			case 'memory': $raw_type = 'balloon'; break;
+			case 'network': $raw_type = 'net'; break;
+			
+			default:
+				# code...
+				break;
 		}
-		return false;
-	}
-	public function get_vm_disk_stats($vm_name, $as_json = false, $pretty_print = false) {
+
 		// Collect data from raw vm stats
 		if ($parsed_data = $this->parse_vm_stats($vm_name)) {
-			$disk_stats = [];
+			$stats = [];
 		
-			// Clean up mem data
-			foreach ($parsed_data['block'] as $block) {
-				$block_entry_name = explode('.', $block['name']);
-				if (count($block_entry_name) === 2) {
-					$block_data = ['name' => $block_entry_name[1], 'value' => (is_numeric($block['value']) ? (int)$block['value'] : $block['value'])];
+			// Clean up stats data
+			foreach ($parsed_data[$raw_type] as $data) {
+				$entry_name = explode('.', $data['name']);
+				if (count($entry_name) === 2) {
+					$entry_data = ['name' => $entry_name[1], 'value' => (is_numeric($data['value']) ? (int)$data['value'] : $data['value'])];
 				}
 				else {
-					$block_data = ['name' => $block['name'], 'value' => (is_numeric($block['value']) ? (int)$block['value'] : $block['value'])];
+					$entry_data = ['name' => $data['name'], 'value' => (is_numeric($data['value']) ? (int)$data['value'] : $data['value'])];
 				}
-				array_push($disk_stats, $block_data);
+				array_push($stats, $entry_data);
 			}
 	
 			// Output as array or json
 			if ($as_json === true) {
 				if ($pretty_print === true) {
-					$json = json_encode($disk_stats, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+					$json = json_encode($stats, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 				}
 				else {
-					$json = json_encode($disk_stats, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
+					$json = json_encode($stats, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
 				}
 				return $json;
 			}
 			else {
-				return $disk_stats;
-			}
-		}
-		return false;
-	}
-	public function get_vm_mem_stats($vm_name, $as_json = false, $pretty_print = false) {
-		// Collect data from raw vm stats
-		if ($parsed_data = $this->parse_vm_stats($vm_name)) {
-			$mem_stats = [];
-		
-			// Clean up mem data
-			foreach ($parsed_data['balloon'] as $balloon) {
-				$balloon_entry_name = explode('.', $balloon['name']);
-				if (count($balloon_entry_name) === 2) {
-					$balloon_data = ['name' => $balloon_entry_name[1], 'value' => (is_numeric($balloon['value']) ? (int)$balloon['value'] : $balloon['value'])];
-				}
-				else {
-					$balloon_data = ['name' => $balloon['name'], 'value' => (is_numeric($balloon['value']) ? (int)$balloon['value'] : $balloon['value'])];
-				}
-				array_push($mem_stats, $balloon_data);
-			}
-	
-			// Output as array or json
-			if ($as_json === true) {
-				if ($pretty_print === true) {
-					$json = json_encode($mem_stats, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-				}
-				else {
-					$json = json_encode($mem_stats, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-				}
-				return $json;
-			}
-			else {
-				return $mem_stats;
-			}
-		}
-		return false;
-	}
-	public function get_vm_net_stats($vm_name, $as_json = false, $pretty_print = false) {
-		// Collect data from raw vm stats
-		if ($parsed_data = $this->parse_vm_stats($vm_name)) {
-			$net_stats = [];
-		
-			// Clean up mem data
-			foreach ($parsed_data['net'] as $net) {
-				$net_entry_name = explode('.', $net['name']);
-				if (count($net_entry_name) === 2) {
-					$net_data = ['name' => $net_entry_name[1], 'value' => (is_numeric($net['value']) ? (int)$net['value'] : $net['value'])];
-				}
-				else {
-					$net_data = ['name' => $net['name'], 'value' => (is_numeric($net['value']) ? (int)$net['value'] : $net['value'])];
-				}
-				array_push($net_stats, $net_data);
-			}
-	
-			// Output as array or json
-			if ($as_json === true) {
-				if ($pretty_print === true) {
-					$json = json_encode($net_stats, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-				}
-				else {
-					$json = json_encode($net_stats, JSON_NUMERIC_CHECK | JSON_UNESCAPED_SLASHES);
-				}
-				return $json;
-			}
-			else {
-				return $net_stats;
+				return $stats;
 			}
 		}
 		return false;
@@ -507,7 +444,6 @@ class libVirt {
 		$lines_to_skip = 2;
 		$index = 0;
 		$col_index = 0;
-		$created_lines = 0;
 		$extracted_data = [];
 		$col_id = 1;
 		$col_name = 2;
@@ -517,8 +453,6 @@ class libVirt {
 			$index++;
 	
 			if ($index > $lines_to_skip && !empty($line)) {
-				$created_lines++;
-	
 				echo '<tr>' . PHP_EOL;
 	
 				$extracted_data = $this->extract_data($line, $delim);
@@ -589,13 +523,11 @@ class libVirt {
 	public function create_table_generic_rows($lines, $delim = ' ', $cols = 0, $cls = '') {
 		$lines_to_skip = 2;
 		$index = 0;
-		$created_lines = 0;
 		$extracted_data = [];
 
 		foreach ($lines as $line) {
 			$index++;
 			if ($index > $lines_to_skip && !empty($line)) {
-				$created_lines++;
 				echo '<tr>' . PHP_EOL;
 				$extracted_data = $this->extract_data($line, $delim);
 				foreach ($extracted_data as $data) {
@@ -613,7 +545,6 @@ class libVirt {
 		$lines_to_skip = 2;
 		$index = 0;
 		$col_index = 0;
-		$created_lines = 0;
 		$extracted_data = [];
 		$col_mac_address = 2;
 		$col_ip_address = 4;
@@ -623,8 +554,6 @@ class libVirt {
 			$index++;
 	
 			if ($index > $lines_to_skip && !empty($line)) {
-				$created_lines++;
-	
 				echo '<tr>' . PHP_EOL;
 	
 				$extracted_data = $this->extract_data($line, $delim);
@@ -686,7 +615,6 @@ class libVirt {
 		$lines_to_skip = 2;
 		$index = 0;
 		$col_index = 0;
-		$created_lines = 0;
 		$extracted_data = [];
 		$col_id = 1;
 		$col_name = 2;
@@ -696,8 +624,6 @@ class libVirt {
 			$index++;
 	
 			if ($index > $lines_to_skip && !empty($line)) {
-				$created_lines++;
-	
 				echo '<tr>' . PHP_EOL;
 	
 				$extracted_data = $this->extract_data($line, $delim);
@@ -780,7 +706,6 @@ class libVirt {
 		}
 		return $is_active;
 	}
-
 	public function vm_is_paused($vm_name) {
 		$is_paused = false;
 		$vm_state = $this->get_vm_state($vm_name);
