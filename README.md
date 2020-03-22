@@ -46,7 +46,11 @@ It is also tested on FreeBSD by my friend [@Sevendogs5](https://twitter.com/Seve
 You should only need to install these packages:
 
 ```bash
-sudo apt install libvirt-bin virt-viewer libguestfs php-cli php-gd php-xml php-json
+# For desktop
+sudo apt install libvirt-bin virt-viewer libguestfs-tools php-cli php-gd php-xml php-json
+
+# For server
+sudo apt install libvirt-bin libguestfs-tools php-cli php-gd php-xml php-json
 ```
 
 > I still need to validate the packages list so this might change later.
