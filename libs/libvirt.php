@@ -506,6 +506,7 @@ class libVirt {
 
 					// Create data cells
 					else {
+						// Can be used for rendering the 'id' column
 						echo '<td>' . $cleaned_data . '</td>' . PHP_EOL;
 					}
 				}
@@ -707,6 +708,7 @@ class libVirt {
 
 					// Create data cells
 					else {
+						// Can be used for rendering the 'id' column
 						echo '<td>' . $cleaned_data . '</td>' . PHP_EOL;
 					}
 				}
