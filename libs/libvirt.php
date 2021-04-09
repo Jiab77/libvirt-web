@@ -665,7 +665,12 @@ class libVirt {
 
 						// Preview
 						echo '<td>' . PHP_EOL;
-						$this->create_vm_screenshots($vm_name);
+						if ($cleaned_data !== 'shut off') {
+							$this->create_vm_screenshots($vm_name);
+						}
+						else {
+							echo 'N/A' . PHP_EOL;
+						}
 						echo '</td>' . PHP_EOL;
 
 						// Other actions
