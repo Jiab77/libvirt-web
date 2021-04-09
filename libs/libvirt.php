@@ -247,15 +247,15 @@ class libVirt {
 		$cmd_return = '';
 		$extracted_data = [];
 		$data_header = [];
-	
+
 		// Get vm raw data
 		$this->virsh_exec('domstats --raw ' . $vm_name, $cmd_output, $cmd_return);
-	
+
 		if ($cmd_return === 0) {
 			// Internal counters
 			$index = 0;
 			$processed_lines = 0;
-		
+
 			// Create data header
 			foreach ($cmd_output as $line) {
 				$index++;
@@ -265,17 +265,17 @@ class libVirt {
 					array_push($data_header, $parsed_line_array[0]);
 				}
 			}
-		
+
 			// Clean up data header
 			$data_header = array_unique($data_header);
-		
+
 			// Merge headers with main array
 			array_merge($extracted_data, $data_header);
-		
+
 			// Reset internal counters
 			$index = 0;
 			$processed_lines = 0;
-		
+
 			// Parse raw vm data
 			foreach ($cmd_output as $line) {
 				$index++;
@@ -289,7 +289,7 @@ class libVirt {
 					}
 				}
 			}
-		
+
 			// Output as array or json
 			if ($as_json === true) {
 				if ($pretty_print === true) {
@@ -322,7 +322,7 @@ class libVirt {
 			case 'disk': $raw_type = 'block'; break;
 			case 'memory': $raw_type = 'balloon'; break;
 			case 'network': $raw_type = 'net'; break;
-			
+
 			default:
 				# code...
 				break;
@@ -331,7 +331,7 @@ class libVirt {
 		// Collect data from raw vm stats
 		if ($parsed_data = $this->parse_vm_stats($vm_name)) {
 			$stats = [];
-		
+
 			// Clean up stats data
 			foreach ($parsed_data[$raw_type] as $data) {
 				$entry_name = explode('.', $data['name']);
@@ -343,7 +343,7 @@ class libVirt {
 				}
 				array_push($stats, $entry_data);
 			}
-	
+
 			// Output as array or json
 			if ($as_json === true) {
 				if ($pretty_print === true) {
@@ -368,9 +368,9 @@ class libVirt {
 		$index = 0;
 		$extracted_data = [];
 		$vm_networks = [];
-	
+
 		$this->virsh_exec('net-list', $output, $return_code);
-	
+
 		foreach ($output as $line) {
 			$index++;
 			if ($index > $lines_to_skip && !empty($line)) {
@@ -378,7 +378,7 @@ class libVirt {
 				array_push($vm_networks, $extracted_data[0]);
 			}
 		}
-	
+
 		return (count($vm_networks) > 0 ? $vm_networks : false);
 	}
 	public function get_vm_pools() {
@@ -387,9 +387,9 @@ class libVirt {
 		$index = 0;
 		$extracted_data = [];
 		$vm_pools = [];
-	
+
 		$this->virsh_exec('pool-list', $output, $return_code);
-	
+
 		foreach ($output as $line) {
 			$index++;
 			if ($index > $lines_to_skip && !empty($line)) {
@@ -397,7 +397,7 @@ class libVirt {
 				array_push($vm_pools, $extracted_data[0]);
 			}
 		}
-	
+
 		return (count($vm_pools) > 0 ? $vm_pools : false);
 	}
 	public function get_vm_uid($vm_name) {
@@ -417,18 +417,18 @@ class libVirt {
 	public function create_vm_screenshots($vm_name) {
 		$input_image  = '/tmp/' . $vm_name . '_screen.ppm';
 		$output_image = '/tmp/' . $vm_name . '_screen.png';
-	
+
 		// Create the screenshot from 'virsh'
 		passthru(escapeshellcmd('virsh screenshot ' . $vm_name . ' --file ' . $input_image . ' --screen 0') . ' 2>&1 >/dev/null');
-	
+
 		// Convert the created screenshot to PNG
 		if (is_readable($input_image)) {
 			// In case of issues, I might move on the 'netpbm' package
 			// and the 'pnmtopng' command to convert the PPM images to PNG
-	
+
 			// Convert the PPM image to PNG using pure PHP implementation
 			$this->ppm_to_png($input_image, 80, $output_image);
-	
+
 			// Output the converted image as Data-URI (base64)
 			if (is_readable($output_image)) {
 				echo '<img class="materialboxed" src="data:image/png;base64,' . base64_encode(file_get_contents($output_image)) . '" width="80" alt="' . $vm_name . ' screenshot">';
@@ -448,36 +448,36 @@ class libVirt {
 		$col_id = 1;
 		$col_name = 2;
 		$col_state = 3;
-	
+
 		foreach ($lines as $line) {
 			$index++;
-	
+
 			if ($index > $lines_to_skip && !empty($line)) {
 				echo '<tr>' . PHP_EOL;
-	
+
 				$extracted_data = $this->extract_data($line, $delim);
-	
+
 				foreach ($extracted_data as $data) {
 					$col_index++;
 					$cleaned_data = trim($data);
-	
+
 					// Assign vm id
 					if ($col_index === $col_id) {
 						if ($cleaned_data !== '-') {
 							$vm_id = (int)$cleaned_data;
 						}
 					}
-	
+
 					// Assign vm name
 					if ($col_index === $col_name) {
 						$vm_name = $cleaned_data;
 						echo '<td><a href="?module=vmi&name=' . $cleaned_data . '">' . $cleaned_data . '</a></td>' . PHP_EOL;
 					}
-					
+
 					// Create actions links and screenshot cells
 					elseif ($col_index === $col_state) {
 						// Action links
-						echo '<td>' . $cleaned_data . '&nbsp;' . PHP_EOL;
+						echo '<td>' . ($cleaned_data === 'shut off' ? 'not running' : $cleaned_data) . '&nbsp;' . PHP_EOL;
 						if ($cleaned_data === 'shut off') {
 							echo '<a href="?module=' . $_SESSION['module'] . '&action=start&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Start"><i class="material-icons">play_arrow</i></a>' . PHP_EOL;
 						}
@@ -492,27 +492,26 @@ class libVirt {
 							echo '<a href="?module=' . $_SESSION['module'] . '&action=reboot&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Reboot"><i class="material-icons">replay</i></a>' . PHP_EOL;
 						}
 						echo '</td>' . PHP_EOL;
-	
-						// Screenshots
+
+						// Preview
 						echo '<td>' . PHP_EOL;
-						// echo 'screenshot here' . PHP_EOL;
 						$this->create_vm_screenshots($vm_name);
 						echo '</td>' . PHP_EOL;
-	
+
 						// Other actions
 						echo '<td>' . PHP_EOL;
 						echo '<a href="?module=' . $_SESSION['module'] . '&action=view&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="View"><i class="material-icons">personal_video</i></a>' . PHP_EOL;
 						echo '</td>' . PHP_EOL;
 					}
-	
+
 					// Create data cells
 					else {
 						echo '<td>' . $cleaned_data . '</td>' . PHP_EOL;
 					}
 				}
-	
+
 				echo '</tr>' . PHP_EOL;
-	
+
 				$col_index = 0; // reset col index
 			}
 		}
@@ -549,29 +548,29 @@ class libVirt {
 		$col_mac_address = 2;
 		$col_ip_address = 4;
 		$col_hostname = 5;
-	
+
 		foreach ($lines as $line) {
 			$index++;
-	
+
 			if ($index > $lines_to_skip && !empty($line)) {
 				echo '<tr>' . PHP_EOL;
-	
+
 				$extracted_data = $this->extract_data($line, $delim);
-	
+
 				foreach ($extracted_data as $data) {
 					$col_index++;
 					$cleaned_data = trim($data);
-	
+
 					// Create mac cell
 					if ($col_index === $col_mac_address) {
 						echo '<td>' . $cleaned_data . '</td>' . PHP_EOL;
 					}
-	
+
 					// Create ip cell
 					elseif ($col_index === $col_ip_address) {
 						echo '<td>' . $cleaned_data . '</td>' . PHP_EOL;
 					}
-	
+
 					// Create hostname cell
 					elseif ($col_index === $col_hostname) {
 						// Assign vm hostname
@@ -582,7 +581,7 @@ class libVirt {
 							if (count($vm_data) > 1) {
 								$vm_duid = $vm_data[1];
 							}
-	
+
 							if (!empty($vm_duid)) {
 								echo '<td>' . $vm_hostname . '</td>' . PHP_EOL;
 								echo '<td>' . $vm_duid . '</td>' . PHP_EOL;
@@ -595,15 +594,15 @@ class libVirt {
 							echo '<td>' . $cleaned_data . '</td>' . PHP_EOL;
 						}
 					}
-	
+
 					// Create other cells
 					else {
 						echo '<td>' . $cleaned_data . '</td>' . PHP_EOL;
 					}
 				}
-	
+
 				echo '</tr>' . PHP_EOL;
-	
+
 				$col_index = 0; // reset col index
 			}
 		}
@@ -619,36 +618,57 @@ class libVirt {
 		$col_id = 1;
 		$col_name = 2;
 		$col_state = 3;
-	
+
 		foreach ($lines as $line) {
 			$index++;
-	
+
 			if ($index > $lines_to_skip && !empty($line)) {
 				echo '<tr>' . PHP_EOL;
-	
+
 				$extracted_data = $this->extract_data($line, $delim);
-	
+
 				foreach ($extracted_data as $data) {
 					$col_index++;
 					$cleaned_data = trim($data);
-	
+
+					// Assign vm id
+					if ($col_index === $col_id) {
+						if ($cleaned_data !== '-') {
+							$vm_id = (int)$cleaned_data;
+						}
+					}
+
 					// Assign vm name
 					if ($col_index === $col_name) {
 						$vm_name = $cleaned_data;
 						echo '<td><a href="?module=vmi&name=' . $cleaned_data . '">' . $cleaned_data . '</a></td>' . PHP_EOL;
 					}
-					
+
 					// Create action links
 					elseif ($col_index === $col_state) {
-						echo '<td>' . $cleaned_data . '&nbsp;' . PHP_EOL;
+						// Action links
+						echo '<td>' . ($cleaned_data === 'shut off' ? 'not running' : $cleaned_data) . '&nbsp;' . PHP_EOL;
 						if ($cleaned_data === 'shut off') {
 							echo '<a href="?module=' . $_SESSION['module'] . '&action=start&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Start"><i class="material-icons">play_arrow</i></a>' . PHP_EOL;
 						}
 						else {
 							echo '<a href="?module=' . $_SESSION['module'] . '&action=stop&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Stop"><i class="material-icons">stop</i></a>' . PHP_EOL;
-							echo '<a href="?module=' . $_SESSION['module'] . '" class="tooltipped" data-position="bottom" data-tooltip="Refresh"><i class="material-icons">refresh</i></a>' . PHP_EOL;
+							if ($cleaned_data === 'paused') {
+								echo '<a href="?module=' . $_SESSION['module'] . '&action=resume&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Resume"><i class="material-icons">play_arrow</i></a>' . PHP_EOL;
+							}
+							else {
+								echo '<a href="?module=' . $_SESSION['module'] . '&action=suspend&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Suspend"><i class="material-icons">pause</i></a>' . PHP_EOL;
+							}
+							echo '<a href="?module=' . $_SESSION['module'] . '&action=reboot&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Reboot"><i class="material-icons">replay</i></a>' . PHP_EOL;
 						}
 						echo '</td>' . PHP_EOL;
+
+						// Preview
+						echo '<td>' . PHP_EOL;
+						$this->create_vm_screenshots($vm_name);
+						echo '</td>' . PHP_EOL;
+
+						// Other actions
 						echo '<td>' . PHP_EOL;
 						echo '<a href="?module=' . $_SESSION['module'] . '&action=snap&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Create snapshot"><i class="material-icons">save</i></a>' . PHP_EOL;
 						echo '<a href="?module=' . $_SESSION['module'] . '&action=edit&name=' . $vm_name . '" class="tooltipped" data-position="bottom" data-tooltip="Edit"><i class="material-icons">edit</i></a>' . PHP_EOL;
@@ -679,15 +699,15 @@ class libVirt {
 						// Closing table cell
 						echo '</td>' . PHP_EOL;
 					}
-	
+
 					// Create data cells
 					else {
 						echo '<td>' . $cleaned_data . '</td>' . PHP_EOL;
 					}
 				}
-	
+
 				echo '</tr>' . PHP_EOL;
-	
+
 				$col_index = 0; // reset col index
 			}
 		}

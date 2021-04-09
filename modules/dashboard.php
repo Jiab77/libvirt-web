@@ -38,7 +38,7 @@
 					<th>Id</th>
 					<th>Name</th>
 					<th>State</th>
-					<th>Screenshot</th>
+					<th>Preview</th>
 					<th>Action</th>
 				</tr>
 			</thead>
@@ -55,7 +55,7 @@
 			</tbody>
 			<tfoot>
 				<tr>
-					<td colspan="3">Max instances: <?php $libVirt->virsh_passthru('maxvcpus'); ?></td>
+					<td colspan="5">Max instances: <?php $libVirt->virsh_passthru('maxvcpus'); ?></td>
 				</tr>
 			</tfoot>
 		</table>

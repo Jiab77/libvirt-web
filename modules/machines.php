@@ -9,6 +9,7 @@
 					<th>Id</th>
 					<th>Name</th>
 					<th>State</th>
+					<th>Preview</th>
 					<th>Action</th>
 				</tr>
 			</thead>
@@ -18,14 +19,14 @@
 			$output_vms = ''; $ret_vms = '';
 			exec('virsh list --all', $output_vms, $ret_vms);
 			if (isset($output_vms) && !empty($output_vms)) {
-				$libVirt->create_table_vms_rows($output_vms, '  ', 4, 'center-align');
+				$libVirt->create_table_vms_rows($output_vms, '  ', 5, 'center-align');
 			}
 			?>
 
 			</tbody>
 			<tfoot>
 				<tr>
-					<td colspan="4"><?php echo 'Total: ' . (count($output_vms)-3); ?></td>
+					<td colspan="5"><?php echo 'Total: ' . (count($output_vms)-3); ?></td>
 				</tr>
 			</tfoot>
 		</table>
