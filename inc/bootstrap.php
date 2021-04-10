@@ -27,12 +27,12 @@ SOFTWARE.
 // Class code is taken from: https://www.webdecker.de/artikel/items/php-ppm-image-file-reader.html
 require_once 'libs/PpmImageReader.php';
 
-// Include our own class
+// Include our own classes
 require_once 'libs/libvirt.php';
 require_once 'libs/libvirt.xml.php';
 require_once 'libs/libvirt.sess.php';
 
-// Init our own class
+// Init our own classes
 $libVirt = new libVirt();
 $libVirtXML = new libVirtXML();
 
@@ -66,7 +66,7 @@ if (isset($_GET['do']) && !empty($_GET['do'])) {
 }
 if (isset($_GET['name']) && !empty($_GET['name'])) {
 	$selected_vm = htmlentities(strip_tags(filter_var($_GET['name'], FILTER_SANITIZE_STRING)));
-	$_SESSION['active_vm'] = $selected_vm;
+	$_SESSION['selected_vm'] = $selected_vm;
 }
 if (isset($_GET['uri']) && !empty($_GET['uri'])) {
 	$connect_uri = htmlentities(strip_tags(filter_var($_GET['uri'], FILTER_SANITIZE_STRING)));
@@ -78,24 +78,31 @@ if (isset($_GET['user']) && !empty($_GET['user'])) {
 }
 
 // Displayed title
+$hypervisor  = json_decode($libVirtXML->xml2json($libVirt->virsh_shell_exec('sysinfo'), false, false));
+$host_title  = $hypervisor->system->entry[0]->attributes->{'nodeValue'};
+$host_title .= ' ';
+$host_title .= $hypervisor->system->entry[1]->attributes->{'nodeValue'};
 $project_title = 'libVirt Web';
 if (isset($module) && !empty($module)) {
 	switch ($module) {
-		case 'dsh': $page_title = 'Dashboard'; break;
-		case 'hyp': $page_title = 'Hypervisor'; break;
-		case 'vmi': $page_title = 'Virtual Machine'; break;
-		case 'vms': $page_title = 'Virtual Machines'; break;
-		case 'vni': $page_title = 'Virtual Network'; break;
-		case 'vns': $page_title = 'Virtual Networks'; break;
-		case 'vst': $page_title = 'Virtual Storage'; break;
-		case 'hlp': $page_title = 'Help'; break;
-		default: $page_title = ''; break;
+		case 'dsh': $module_title = 'Dashboard'; break;
+		case 'hyp': $module_title = 'Hypervisor'; break;
+		case 'vmi': $module_title = 'Virtual Machine &ndash; ' . $_SESSION['selected_vm']; break;
+		case 'vms': $module_title = 'Virtual Machines'; break;
+		case 'vni': $module_title = 'Virtual Network &ndash; ' . $_SESSION['selected_vm']; break;
+		case 'vns': $module_title = 'Virtual Networks'; break;
+		case 'vst': $module_title = 'Virtual Storage'; break;
+		case 'hlp': $module_title = 'Help'; break;
+		default: $module_title = ''; break;
 	}
 
-	$page_title .= (!empty($page_title) ? ' &ndash; ' . $project_title : '');
+	$page_title  = $project_title;
+	$page_title .= (!empty($host_title) ? ' &ndash; ' . $host_title : '');
+	$page_title .= (!empty($module_title) ? ' &ndash; ' . $module_title : '');
 }
 else {
-	$page_title = $project_title;
+	$page_title  = $project_title;
+	$page_title .= (!empty($host_title) ? ' &ndash; ' . $host_title : '');
 }
 
 // Actions (All Modules)
@@ -103,10 +110,10 @@ if (isset($vm_action) && !empty($vm_action)) {
 	$virsh_output = '';
 	switch ($vm_action) {
 		case 'clone':
-			if ($libVirt->vm_is_paused($_SESSION['active_vm']) === true) {
-				$exec_cmd  = 'virt-clone --original ' . $_SESSION['active_vm'];
-				$exec_cmd .= ' --name ' . $_SESSION['active_vm'] . '-clone';
-				// $exec_cmd .= ' --file ' . $_SESSION['active_vm'] . '-clone-disk';
+			if ($libVirt->vm_is_paused($_SESSION['selected_vm']) === true) {
+				$exec_cmd  = 'virt-clone --original ' . $_SESSION['selected_vm'];
+				$exec_cmd .= ' --name ' . $_SESSION['selected_vm'] . '-clone';
+				// $exec_cmd .= ' --file ' . $_SESSION['selected_vm'] . '-clone-disk';
 				$exec_cmd .= ' --auto-clone';
 				$exec_cmd .= ' --debug';
 				$libVirt->exec_cmd_notify($exec_cmd, $exec_output, $ret_action);
@@ -121,7 +128,7 @@ if (isset($vm_action) && !empty($vm_action)) {
 			break;
 
 		case 'delete':
-			/* $virsh_cmd  = 'undefine --domain ' . $_SESSION['active_vm'];
+			/* $virsh_cmd  = 'undefine --domain ' . $_SESSION['selected_vm'];
 			$virsh_cmd .= ' --remove-all-storage --managed-save --delete-snapshots';
 			$virsh_cmd .= ' --snapshots-metadata --nvram'; */
 
@@ -130,7 +137,7 @@ if (isset($vm_action) && !empty($vm_action)) {
 
 			// Retry to delete using another way in case of error
 			/* if ($ret_action !== 0) {
-				$virsh_cmd  = 'undefine --domain ' . $_SESSION['active_vm'];
+				$virsh_cmd  = 'undefine --domain ' . $_SESSION['selected_vm'];
 				$virsh_cmd .= ' --remove-all-storage --managed-save --delete-snapshots';
 				$virsh_cmd .= ' --snapshots-metadata --nvram';
 				$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
@@ -138,10 +145,10 @@ if (isset($vm_action) && !empty($vm_action)) {
 			break;
 
 		case 'prep':
-			if ($libVirt->vm_is_paused($_SESSION['active_vm']) === true) {
+			if ($libVirt->vm_is_paused($_SESSION['selected_vm']) === true) {
 				$excluded_operations = "$(virt-sysprep --list-operations | egrep -v 'fs-uuids|lvm-uuids|ssh-userdir' | awk '{ printf \"%s,\", $1}' | sed 's/,$//')";
-				$exec_cmd  = 'virt-sysprep --domain ' . $_SESSION['active_vm'] . '-clone';
-				$exec_cmd .= ' --hostname ' . $_SESSION['active_vm'] . '-clone';
+				$exec_cmd  = 'virt-sysprep --domain ' . $_SESSION['selected_vm'] . '-clone';
+				$exec_cmd .= ' --hostname ' . $_SESSION['selected_vm'] . '-clone';
 				$exec_cmd .= ' --keep-user-accounts ' . $_SESSION['active_vm_user'];
 				$exec_cmd .= ' --enable ' . $excluded_operations;
 				// If debian based VM
@@ -158,26 +165,26 @@ if (isset($vm_action) && !empty($vm_action)) {
 			break;
 
 		case 'reboot':
-			$virsh_cmd = 'reboot ' . $_SESSION['active_vm'];
+			$virsh_cmd = 'reboot ' . $_SESSION['selected_vm'];
 			$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
 			break;
 
 		case 'resume':
-			$virsh_cmd = 'resume ' . $_SESSION['active_vm'];
+			$virsh_cmd = 'resume ' . $_SESSION['selected_vm'];
 			$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
 			break;
 
 		case 'snap':
-			$virsh_cmd  = 'snapshot-create-as --domain ' . $_SESSION['active_vm'];
-			$virsh_cmd .= ' --name "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'live' : 'offline') . '-snapshot-' . date("dmYHis") . '"';
-			$virsh_cmd .= ' --description "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'Live' : 'Offline') . ' snapshot taken on ' . date("d/m/Y H:i:s") . '"';
+			$virsh_cmd  = 'snapshot-create-as --domain ' . $_SESSION['selected_vm'];
+			$virsh_cmd .= ' --name "' . ($libVirt->vm_is_active($_SESSION['selected_vm']) ? 'live' : 'offline') . '-snapshot-' . date("dmYHis") . '"';
+			$virsh_cmd .= ' --description "' . ($libVirt->vm_is_active($_SESSION['selected_vm']) ? 'Live' : 'Offline') . ' snapshot taken on ' . date("d/m/Y H:i:s") . '"';
 			$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
 
 			// Create a 'disk-only' snapshot in case of error
 			if ($ret_action !== 0) {
-				$virsh_cmd  = 'snapshot-create-as --domain ' . $_SESSION['active_vm'];
-				$virsh_cmd .= ' --name "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'live' : 'offline') . '-disk-only-snapshot-' . date("dmYHis") . '"';
-				$virsh_cmd .= ' --description "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'Live' : 'Offline') . ' disk-only snapshot taken on ' . date("d/m/Y H:i:s") . '"';
+				$virsh_cmd  = 'snapshot-create-as --domain ' . $_SESSION['selected_vm'];
+				$virsh_cmd .= ' --name "' . ($libVirt->vm_is_active($_SESSION['selected_vm']) ? 'live' : 'offline') . '-disk-only-snapshot-' . date("dmYHis") . '"';
+				$virsh_cmd .= ' --description "' . ($libVirt->vm_is_active($_SESSION['selected_vm']) ? 'Live' : 'Offline') . ' disk-only snapshot taken on ' . date("d/m/Y H:i:s") . '"';
 				// $virsh_cmd .= ' --quiesce'; // Only when qemu agent is installed
 				$virsh_cmd .= ' --disk-only';
 				$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action2);
@@ -185,43 +192,43 @@ if (isset($vm_action) && !empty($vm_action)) {
 
 			// Retry while stopping the VM first
 			if ($ret_action2 !== 0) {
-				$virsh_cmd  = 'shutdown --domain ' . $_SESSION['active_vm'];
+				$virsh_cmd  = 'shutdown --domain ' . $_SESSION['selected_vm'];
 				$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
 
-				$virsh_cmd  = 'snapshot-create-as --domain ' . $_SESSION['active_vm'];
-				$virsh_cmd .= ' --name "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'live' : 'offline') . '-snapshot-' . date("dmYHis") . '"';
-				$virsh_cmd .= ' --description "' . ($libVirt->vm_is_active($_SESSION['active_vm']) ? 'Live' : 'Offline') . ' snapshot taken on ' . date("d/m/Y H:i:s") . '"';
+				$virsh_cmd  = 'snapshot-create-as --domain ' . $_SESSION['selected_vm'];
+				$virsh_cmd .= ' --name "' . ($libVirt->vm_is_active($_SESSION['selected_vm']) ? 'live' : 'offline') . '-snapshot-' . date("dmYHis") . '"';
+				$virsh_cmd .= ' --description "' . ($libVirt->vm_is_active($_SESSION['selected_vm']) ? 'Live' : 'Offline') . ' snapshot taken on ' . date("d/m/Y H:i:s") . '"';
 				$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
 			}
 			break;
 
 		case 'start':
-			$virsh_cmd = 'start ' . $_SESSION['active_vm'];
+			$virsh_cmd = 'start ' . $_SESSION['selected_vm'];
 			$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
 			break;
 
 		case 'stop':
-			$virsh_cmd = 'shutdown ' . $_SESSION['active_vm'];
+			$virsh_cmd = 'shutdown ' . $_SESSION['selected_vm'];
 			$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
 
 			// Force shutdown in case of error
-			if ($ret_action !== 0 || $libVirt->vm_is_active($_SESSION['active_vm']) === true) {
-				$virsh_cmd = 'destroy ' . $_SESSION['active_vm'];
+			if ($ret_action !== 0 || $libVirt->vm_is_active($_SESSION['selected_vm']) === true) {
+				$virsh_cmd = 'destroy ' . $_SESSION['selected_vm'];
 				$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
 			}
 			break;
 
 		case 'suspend':
-			$virsh_cmd = 'suspend ' . $_SESSION['active_vm'];
+			$virsh_cmd = 'suspend ' . $_SESSION['selected_vm'];
 			$libVirt->virsh_exec_notify($virsh_cmd, $virsh_output, $ret_action);
 			break;
 
 		case 'view':
 			$libVirt->notify('Starting virt-viewer...');
-			$exec_cmd = 'virt-viewer -v -w ' . escapeshellarg($_SESSION['active_vm']) . ' &';
+			$exec_cmd = 'virt-viewer -v -w ' . escapeshellarg($_SESSION['selected_vm']) . ' &';
 			$libVirt->exec_cmd_notify($exec_cmd, $exec_output, $ret_action);
 			break;
-		
+
 		default:
 			# code...
 			break;
@@ -253,7 +260,7 @@ if (isset($module_action) && !empty($module_action)) {
 		case 'view':
 			# code...
 			break;
-		
+
 		default:
 			# code...
 			break;
@@ -280,84 +287,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Ajax
 if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 	if (isset($_REQUEST['data']) && !empty($_REQUEST['data'])) {
-		$stat_data = htmlentities(strip_tags(filter_var($_REQUEST['data'], FILTER_SANITIZE_STRING)));
+		$client_request = htmlentities(strip_tags(filter_var($_REQUEST['data'], FILTER_SANITIZE_STRING)));
 
-		switch ($stat_data) {
+		switch ($client_request) {
 			case 'cpu':
-				$stat_cmd = $libVirt->virsh_shell_exec('nodecpustats');
+				$client_response = $libVirt->virsh_shell_exec('nodecpustats');
 				break;
 
 			case 'mem':
-				$stat_cmd = $libVirt->virsh_shell_exec('nodememstats');
+				$client_response = $libVirt->virsh_shell_exec('nodememstats');
 				break;
 
 			case 'node':
-				$stat_cmd = $libVirt->virsh_shell_exec('nodeinfo');
+				$client_response = $libVirt->virsh_shell_exec('nodeinfo');
 				break;
 
 			case 'vhostcpu':
-				if ($libVirt->vm_is_active($_SESSION['active_vm'])) {
-					$stat_cmd = $libVirt->virsh_shell_exec('cpu-stats ' . $_SESSION['active_vm']);
+				if ($libVirt->vm_is_active($_SESSION['selected_vm'])) {
+					$client_response = $libVirt->virsh_shell_exec('cpu-stats ' . $_SESSION['selected_vm']);
 				}
 				else {
-					$stat_cmd = 'VM is not running.';
+					$client_response = 'VM is not running.';
 				}
 				break;
 
 			case 'vcpu':
-				if ($libVirt->vm_is_active($_SESSION['active_vm'])) {
-					$stat_cmd = print_r($libVirt->get_vm_stats($_SESSION['active_vm'], 'cpu'), true);
+				if ($libVirt->vm_is_active($_SESSION['selected_vm'])) {
+					$client_response = print_r($libVirt->get_vm_stats($_SESSION['selected_vm'], 'cpu'), true);
 				}
 				else {
-					// $stat_cmd = 'VM is not running.';
-					$stat_cmd  = 'VM is not running.' . PHP_EOL;
-					// $stat_cmd .= print_r($libVirt->get_vm_stats($_SESSION['active_vm'], 'cpu'), true);
+					// $client_response = 'VM is not running.';
+					$client_response = 'VM is not running.' . PHP_EOL;
+					// $client_response .= print_r($libVirt->get_vm_stats($_SESSION['selected_vm'], 'cpu'), true);
 				}
 				break;
 
 			case 'vdsk':
-				if ($libVirt->vm_is_active($_SESSION['active_vm'])) {
-					$stat_cmd = print_r($libVirt->get_vm_stats($_SESSION['active_vm'], 'disk'), true);
+				if ($libVirt->vm_is_active($_SESSION['selected_vm'])) {
+					$client_response = print_r($libVirt->get_vm_stats($_SESSION['selected_vm'], 'disk'), true);
 				}
 				else {
-					// $stat_cmd = 'VM is not running.';
-					$stat_cmd  = 'VM is not running.' . PHP_EOL;
-					// $stat_cmd .= print_r($libVirt->get_vm_stats($_SESSION['active_vm'], 'disk'), true);
+					// $client_response = 'VM is not running.';
+					$client_response = 'VM is not running.' . PHP_EOL;
 				}
 				break;
 
 			case 'vmem':
-				if ($libVirt->vm_is_active($_SESSION['active_vm'])) {
-					// $stat_cmd = $libVirt->virsh_shell_exec('dommemstat ' . $_SESSION['active_vm']);
-					$stat_cmd = print_r($libVirt->get_vm_stats($_SESSION['active_vm'], 'memory'), true);
+				if ($libVirt->vm_is_active($_SESSION['selected_vm'])) {
+					// $client_response = $libVirt->virsh_shell_exec('dommemstat ' . $_SESSION['selected_vm']);
+					$client_response = print_r($libVirt->get_vm_stats($_SESSION['selected_vm'], 'memory'), true);
 				}
 				else {
-					// $stat_cmd = 'VM is not running.';
-					$stat_cmd  = 'VM is not running.' . PHP_EOL;
-					// $stat_cmd .= print_r($libVirt->get_vm_stats($_SESSION['active_vm'], 'memory'), true);
+					// $client_response = 'VM is not running.';
+					$client_response = 'VM is not running.' . PHP_EOL;
 				}
 				break;
 
 			case 'vnet':
-				if ($libVirt->vm_is_active($_SESSION['active_vm'])) {
-					$stat_cmd = print_r($libVirt->get_vm_stats($_SESSION['active_vm'], 'network'), true);
+				if ($libVirt->vm_is_active($_SESSION['selected_vm'])) {
+					$client_response = print_r($libVirt->get_vm_stats($_SESSION['selected_vm'], 'network'), true);
 				}
 				else {
-					$stat_cmd  = 'VM is not running.' . PHP_EOL;
-					// $stat_cmd .= print_r($libVirt->get_vm_stats($_SESSION['active_vm'], 'network'), true);
+					$client_response = 'VM is not running.' . PHP_EOL;
 				}
 				break;
 
 			case 'vhost':
-				$stat_cmd = $libVirt->virsh_shell_exec('domstats --raw ' . $_SESSION['active_vm']);
+				$client_response = $libVirt->virsh_shell_exec('domstats --raw ' . $_SESSION['selected_vm']);
+				break;
+
+			case 'preview':
+				if ($libVirt->vm_is_active($_SESSION['selected_vm'])) {
+					$client_response = $libVirt->create_vm_screenshots($_SESSION['selected_vm'], true);
+				}
+				else {
+					$client_response = 'VM is not running.' . PHP_EOL;
+				}
 				break;
 		}
 
 		// Prepare ajax response
-		$ajax_response = $libVirt->ajax_response($stat_cmd);
-		
+		$client_response = $libVirt->ajax_response($client_response, $_SESSION['selected_vm']);
+
 		// Send ajax response as JSON
-		$libVirt->send_json($ajax_response, true);
+		$libVirt->send_json($client_response, true);
 
 		// Stop processing
 		exit;

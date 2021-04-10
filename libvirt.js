@@ -6,7 +6,7 @@ function updateSize() {
 		oFiles = document.getElementById("uploadFiles").files,
 		nFiles = oFiles.length,
 		file;
-	
+
 	// Display file info
 	console.info('Uploading files...', oFiles);
 	for (var i = 0; i < oFiles.length; i++) {
@@ -102,6 +102,37 @@ function uploadCanceled(event) {
 	console.log('Load Event:', event);
 	document.getElementById("uploadStatus").innerHTML = 'Canceled.';
 }
+// From: https://stackoverflow.com/questions/5796718/html-entity-decode#comment98534802_42182294
+// And: https://stackoverflow.com/questions/24816/escaping-html-strings-with-jquery/46685127#46685127
+function escapeHtml(str, preserve) {
+	if (preserve && preserve === true) {
+		var textArea = document.createElement('textarea');
+		textArea.innerHTML = str;
+		return textArea.value;
+	}
+	else {
+		var div = document.createElement('div');
+		div.innerText = str;
+		return div.innerHTML;
+	}
+}
+// From: https://stackoverflow.com/questions/5796718/html-entity-decode/28543554#28543554
+function htmlDecode(str, preserve) {
+	if (preserve && preserve === true) {
+		return $("<textarea/>").html(value).text();
+	}
+	else {
+		return $("<div/>").html(str).text();
+	}
+}
+function htmlEncode(str, preserve) {
+	if (preserve && preserve === true) {
+		return $('<textarea/>').text(value).html();
+	}
+	else {
+		return $('<div/>').text(str).html();
+	}
+}
 
 // Data polling
 function getJSONData(data, name) {
@@ -114,34 +145,39 @@ function getJSONData(data, name) {
 	});
 }
 function refreshStats(type, response) {
+	console.log('Received:', response);
+
 	if (type && typeof response === 'object') {
 		switch (type) {
 			case 'cpu':
-				$('#cpu-stats').text(response.html);
+				$('#cpu-stats').text(response.content);
 				break;
 			case 'mem':
-				$('#mem-stats').text(response.html);
+				$('#mem-stats').text(response.content);
 				break;
 			case 'node':
-				$('#node-info').text(response.html);
+				$('#node-info').text(response.content);
 				break;
 			case 'vhostcpu':
-				$('#vhostcpu-stats').text(response.html);
+				$('#vhostcpu-stats').text(response.content);
 				break;
 			case 'vcpu':
-				$('#vcpu-stats').text(response.html);
+				$('#vcpu-stats').text(response.content);
 				break;
 			case 'vdsk':
-				$('#vdsk-stats').text(response.html);
+				$('#vdsk-stats').text(response.content);
 				break;
 			case 'vmem':
-				$('#vmem-stats').text(response.html);
+				$('#vmem-stats').text(response.content);
 				break;
 			case 'vnet':
-				$('#vnet-stats').text(response.html);
+				$('#vnet-stats').text(response.content);
 				break;
 			case 'vhost':
-				$('#vhost-stats').text(response.html);
+				$('#vhost-stats').text(response.content);
+				break;
+			case 'preview':
+				$('.live-preview').filter('[data-vm="' + response.vm + '"]').find('img').attr('src', response.content);
 				break;
 		}
 		return true;

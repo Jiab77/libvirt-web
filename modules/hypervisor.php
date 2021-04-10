@@ -100,7 +100,7 @@
 								$create_cmd  = 'virt-install --help';
 								$virsh = false;
 								break;
-							
+
 							default:
 								$create_type = '';
 								$create_cmd  = '';
@@ -149,7 +149,7 @@
 
 					<?php
 					break;
-				
+
 				default:
 					# code...
 					break;

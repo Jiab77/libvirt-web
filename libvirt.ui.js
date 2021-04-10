@@ -36,7 +36,7 @@ $(document).ready(function() {
 			if (modal[0].id === 'modal-connect') {
 				var $user = $('#connect-user'),
 					$host = $('#connect-host');
-				
+
 				if ($user.hasClass('valid') && $host.hasClass('valid')) {
 					console.log('do remote connection!', $user, $host);
 				}
@@ -90,28 +90,76 @@ $(document).ready(function() {
 	}
 
 	// Init polling from modules
-	if (params && params.get('module') === 'dsh') {
-		var elements = ['cpu', 'mem', 'node'];
-		var delayedPolling = setTimeout(function() {
-			var polling = setInterval(function() {
-				elements.forEach(function (value, index) {
-					console.info('Request data id:', index, '| type:', value);
-					getJSONData(value);
-				});
-			}, 1000);
-			clearTimeout(delayedPolling);
-		}, 500);
-	}
-	if (params && params.get('module') === 'vmi') {
-		var elements = ['vhostcpu', 'vcpu', 'vdsk', 'vmem', 'vnet', 'vhost'];
-		var delayedPolling = setTimeout(function() {
-			var polling = setInterval(function() {
-				elements.forEach(function (value, index) {
-					console.info('Request data id:', index, '| type:', value);
-					getJSONData(value, params.get('name'));
-				});
-			}, 1000);
-			clearTimeout(delayedPolling);
-		}, 500);
+	if (params) {
+		switch (params.get('module')) {
+			case 'dsh':
+				var elements = ['cpu', 'mem', 'node', 'preview'];
+				var delayedPolling = setTimeout(function() {
+					var shortPolling = setInterval(function() {
+						elements.forEach(function (value, index) {
+							if (value === 'preview') { return; }
+							console.info('Request data id:', index, '| type:', value);
+							getJSONData(value);
+						});
+					}, 1000);
+					clearTimeout(delayedPolling);
+					$(window).one('unload', function () {
+						clearInterval(shortPolling);
+					});
+				}, 100);
+				var delayedPolling2 = setTimeout(function() {
+					var shortPolling2 = setInterval(function() {
+						elements.forEach(function (value, index) {
+							if (value !== 'preview') { return; }
+							$('.live-preview').each(function() {
+								console.info('Request data id:', index, '| type:', value);
+								getJSONData(value, $(this).data('vm'));
+							});
+						});
+					}, 5000);
+					clearTimeout(delayedPolling2);
+					$(window).one('unload', function () {
+						clearInterval(shortPolling2);
+					});
+				}, 100);
+				break;
+
+			case 'vms':
+				var elements = ['preview'];
+				var delayedPolling = setTimeout(function() {
+					var longPolling = setInterval(function() {
+						elements.forEach(function (value, index) {
+							console.info('Request data id:', index, '| type:', value);
+							$('.live-preview').each(function() {
+								getJSONData(value, $(this).data('vm'));
+							});
+						});
+					}, 5000);
+					clearTimeout(delayedPolling);
+					$(window).one('unload', function () {
+						clearInterval(longPolling);
+					});
+				}, 100);
+				break;
+
+			case 'vmi':
+				var elements = ['vhostcpu', 'vcpu', 'vdsk', 'vmem', 'vnet', 'vhost'];
+				var delayedPolling = setTimeout(function() {
+					var shortPolling = setInterval(function() {
+						elements.forEach(function (value, index) {
+							console.info('Request data id:', index, '| type:', value);
+							getJSONData(value, params.get('name'));
+						});
+					}, 1000);
+					clearTimeout(delayedPolling);
+					$(window).one('unload', function () {
+						clearInterval(shortPolling);
+					});
+				}, 100);
+				break;
+
+			default:
+				break;
+		}
 	}
 });

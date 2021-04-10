@@ -414,7 +414,7 @@ class libVirt {
 	}
 
 	// Screenshots
-	public function create_vm_screenshots($vm_name) {
+	public function create_vm_screenshots($vm_name, $exportable = false) {
 		$input_image  = '/tmp/' . $vm_name . '_screen.ppm';
 		$output_image = '/tmp/' . $vm_name . '_screen.png';
 
@@ -431,7 +431,12 @@ class libVirt {
 
 			// Output the converted image as Data-URI (base64)
 			if (is_readable($output_image)) {
-				echo '<img class="materialboxed" src="data:image/png;base64,' . base64_encode(file_get_contents($output_image)) . '" width="80" alt="' . $vm_name . ' screenshot">';
+				if ($exportable === true) {
+					return 'data:image/png;base64,' . base64_encode(file_get_contents($output_image));
+				}
+				else {
+					echo '<img class="materialboxed" src="data:image/png;base64,' . base64_encode(file_get_contents($output_image)) . '" width="80" alt="' . $vm_name . ' screenshot">';
+				}
 			}
 		}
 		else {
@@ -494,7 +499,7 @@ class libVirt {
 						echo '</td>' . PHP_EOL;
 
 						// Preview
-						echo '<td>' . PHP_EOL;
+						echo '<td class="live-preview" data-vm="' . $vm_name . '">' . PHP_EOL;
 						$this->create_vm_screenshots($vm_name);
 						echo '</td>' . PHP_EOL;
 
@@ -665,7 +670,7 @@ class libVirt {
 						echo '</td>' . PHP_EOL;
 
 						// Preview
-						echo '<td>' . PHP_EOL;
+						echo '<td class="live-preview" data-vm="' . $vm_name . '">' . PHP_EOL;
 						if ($cleaned_data !== 'shut off') {
 							$this->create_vm_screenshots($vm_name);
 						}
@@ -743,10 +748,12 @@ class libVirt {
 	}
 
 	// Ajax data
-	public function ajax_response($data) {
+	public function ajax_response($data, $vm_name) {
 		$response = new stdClass;
-		$response->html  = '';
-		$response->html .= $data;
+		$response->content = $data;
+		if (isset($vm_name) && !empty($vm_name)) {
+			$response->vm = $vm_name;
+		}
 		$response->success = (!is_null($data) ? true : false);
 		return $response;
 	}
