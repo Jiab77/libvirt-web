@@ -51,6 +51,9 @@ sudo apt install libvirt-bin virt-viewer libguestfs-tools php-cli php-gd php-xml
 
 # For server
 sudo apt install libvirt-bin libguestfs-tools php-cli php-gd php-xml php-json
+
+# For PHP < 7.4
+sudo apt install ucspi-tcp
 ```
 
 > I still need to validate the packages list so this might change later.
@@ -69,7 +72,7 @@ You can start the server that way:
 
 ```bash
 cd libvirt-web
-php -S localhost:8000 libvirtweb.php
+./start-local-server.sh
 ```
 
 > `sudo` is not required to run the server. It is required only if you want to run the server on a port below **1024**.

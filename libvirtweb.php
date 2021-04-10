@@ -23,6 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+// Routing
+// https://www.php.net/manual/en/features.commandline.webserver.php
+if (preg_match('/\.(?:png|jpg|jpeg|gif|js|css)$/', $_SERVER["REQUEST_URI"])) {
+    return false;    // serve the requested resource as-is.
+}
+
 // Load bootstrapping code
 require_once 'inc/bootstrap.php';
 ?>
@@ -225,7 +231,7 @@ require_once 'inc/bootstrap.php';
 							case 'hlp':
 								require_once __DIR__ . '/modules/help.php';
 								break;
-							
+
 							// TODO: Improve design
 							default:
 								require_once __DIR__ . '/modules/invalid.php';
@@ -248,7 +254,7 @@ require_once 'inc/bootstrap.php';
 			</div>
 		</div>
 	</main>
-	
+
 	<footer class="page-footer grey darken-3">
 		<div class="container">
 			<div class="row">
@@ -335,16 +341,8 @@ require_once 'inc/bootstrap.php';
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 
 	<!-- App JS -->
-	<script type="text/javascript">
-	<?php
-	echo file_get_contents(__DIR__ . '/libvirt.js') . PHP_EOL;
-	?>
-	</script>
-	<script type="text/javascript">
-	<?php
-	echo file_get_contents(__DIR__ . '/libvirt.ui.js') . PHP_EOL;
-	?>
-	</script>
+	<script type="text/javascript" src="<?php echo '//' . $_SERVER['HTTP_HOST'] . '/libvirt.js'; ?>"></script>
+	<script type="text/javascript" src="<?php echo '//' . $_SERVER['HTTP_HOST'] . '/libvirt.ui.js'; ?>"></script>
 
 	<!-- Connection -->
 	<?php
@@ -365,6 +363,10 @@ require_once 'inc/bootstrap.php';
 		}
 	}
 	?>
+
+	<!--
+	<?php echo 'Debug: ' . print_r($_SERVER, true); ?>
+	-->
 
 </body>
 </html>
