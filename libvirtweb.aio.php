@@ -423,7 +423,7 @@ function create_table_active_vms_rows($lines, $delim = ' ', $cols = 0, $cls = ''
 					$vm_name = $cleaned_data;
 					echo '<td><a href="?module=vmi&name=' . $cleaned_data . '">' . $cleaned_data . '</a></td>' . PHP_EOL;
 				}
-				
+
 				// Create actions links and screenshot cells
 				elseif ($col_index === $col_state) {
 					// Action links
@@ -500,7 +500,7 @@ function create_table_vms_rows($lines, $delim = ' ', $cols = 0, $cls = '') {
 					$vm_name = $cleaned_data;
 					echo '<td><a href="?module=vmi&name=' . $cleaned_data . '">' . $cleaned_data . '</a></td>' . PHP_EOL;
 				}
-				
+
 				// Create action links
 				elseif ($col_index === $col_state) {
 					echo '<td>' . $cleaned_data . '&nbsp;' . PHP_EOL;
@@ -589,7 +589,7 @@ function parse_vm_stats($vm_name, $as_json = false, $pretty_print = false) {
 		// Internal counters
 		$index = 0;
 		$processed_lines = 0;
-	
+
 		// Create data header
 		foreach ($cmd_output as $line) {
 			$index++;
@@ -599,17 +599,17 @@ function parse_vm_stats($vm_name, $as_json = false, $pretty_print = false) {
 				array_push($data_header, $parsed_line_array[0]);
 			}
 		}
-	
+
 		// Clean up data header
 		$data_header = array_unique($data_header);
-	
+
 		// Merge headers with main array
 		array_merge($extracted_data, $data_header);
-	
+
 		// Reset internal counters
 		$index = 0;
 		$processed_lines = 0;
-	
+
 		// Parse raw vm data
 		foreach ($cmd_output as $line) {
 			$index++;
@@ -623,7 +623,7 @@ function parse_vm_stats($vm_name, $as_json = false, $pretty_print = false) {
 				}
 			}
 		}
-	
+
 		// Output as array or json
 		if ($as_json === true) {
 			if ($pretty_print === true) {
@@ -644,7 +644,7 @@ function get_vm_cpu_stats($vm_name, $as_json = false, $pretty_print = false) {
 	// Collect data from raw vm stats
 	if ($parsed_data = parse_vm_stats($vm_name)) {
 		$cpu_stats = [];
-	
+
 		// Clean up vpu data
 		foreach ($parsed_data['vcpu'] as $vcpu) {
 			$vcpu_entry_name = explode('.', $vcpu['name']);
@@ -677,7 +677,7 @@ function get_vm_mem_stats($vm_name, $as_json = false, $pretty_print = false) {
 	// Collect data from raw vm stats
 	if ($parsed_data = parse_vm_stats($vm_name)) {
 		$mem_stats = [];
-	
+
 		// Clean up mem data
 		foreach ($parsed_data['balloon'] as $balloon) {
 			$balloon_entry_name = explode('.', $balloon['name']);
@@ -710,7 +710,7 @@ function get_vm_net_stats($vm_name, $as_json = false, $pretty_print = false) {
 	// Collect data from raw vm stats
 	if ($parsed_data = parse_vm_stats($vm_name)) {
 		$net_stats = [];
-	
+
 		// Clean up mem data
 		foreach ($parsed_data['net'] as $net) {
 			$net_entry_name = explode('.', $net['name']);
@@ -860,7 +860,7 @@ if (isset($_SESSION['action']) && !empty($_SESSION['action'])) {
 			$action_cmd = 'virt-viewer -v -w ' . escapeshellarg($_SESSION['vm_name']) . ' &';
 			exec($action_cmd, $output_action, $ret_action);
 			break;
-		
+
 		default:
 			# code...
 			break;
@@ -963,7 +963,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 		$ajax_response->html  = '';
 		$ajax_response->html .= $cmd_output;
 		$ajax_response->success = (!is_null($cmd_output) ? true : false);
-		
+
 		// Send ajax response as JSON
 		send_json($ajax_response, true);
 
@@ -1455,7 +1455,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 							// Working: false
 							// Outputs: error: failed to get hostname
 							// Outputs: error: this function is not supported by the connection driver: virDomainGetHostname
-							
+
 							?></pre> -->
 						</div>
 					</div>
@@ -1761,7 +1761,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 
 								<?php
 								break;
-							
+
 							default:
 								?>
 
@@ -1791,7 +1791,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 			</div>
 		</div>
 	</main>
-	
+
 	<footer class="page-footer grey darken-3">
 		<div class="container">
 			<div class="row">
@@ -1800,7 +1800,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 					<p class="grey-text text-lighten-4">A simple web interface based on <a href="https://libvirt.org/" rel="nofollow noopener noreferrer" target="_blank">libVirt</a>.</p>
 					<small class="grey-text text-lighten-4"><?php echo 'Generated in ' . get_loading_time() . ' seconds'; ?></small>
 				</div>
-				<div class="col l4 offset-l2 s12">
+				<div class="col l3 offset-l3 s12">
 					<h5 class="white-text">Links</h5>
 					<ul>
 						<li><a class="grey-text text-lighten-3" href="https://github.com/Jiab77/libvirt-web" rel="nofollow noopener noreferrer" target="_blank">Project</a></li>
@@ -1810,8 +1810,8 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 		</div>
 		<div class="footer-copyright">
 			<div class="container">
-				<?php echo '&copy; ' . date("Y") . ' &ndash; <a href="github.com/jiab77" rel="nofollow noopener noreferrer" target="_blank">Jiab77</a>'; ?>
-				<a class="grey-text text-lighten-4 right" href="gist.github.com/jiab77" rel="nofollow noopener noreferrer" target="_blank">My gists</a>
+				<?php echo '&copy; ' . date("Y") . ' &ndash; <a href="https://github.com/jiab77" rel="nofollow noopener noreferrer" target="_blank">Jiab77</a>'; ?>
+				<!-- <a class="grey-text text-lighten-4 right" href="https://gist.github.com/jiab77" rel="nofollow noopener noreferrer" target="_blank">My gists</a> -->
 			</div>
 		</div>
 	</footer>
