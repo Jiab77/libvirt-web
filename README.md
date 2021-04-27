@@ -27,11 +27,12 @@ There is only few dependencies required:
 
 1. `libvirt-bin` (The `virsh` command should be provided by [libVirt](https://libvirt.org/))
 2. `virt-viewer`
-3. `libguestfs`
-4. `php-cli`
-5. `php-gd`
-6. `php-xml`
-7. `php-json`
+3. `virt-install`
+4. `libguestfs`
+5. `php-cli`
+6. `php-gd`
+7. `php-xml`
+8. `php-json`
 
 > I have dropped the ImageMagick `convert` command from dependencies.
 
@@ -47,10 +48,10 @@ You should only need to install these packages:
 
 ```bash
 # For desktop
-sudo apt install libvirt-bin virt-viewer libguestfs-tools php-cli php-gd php-xml php-json
+sudo apt install libvirt-bin virt-viewer virtinst libguestfs-tools php-cli php-gd php-xml php-json
 
 # For server
-sudo apt install libvirt-bin libguestfs-tools php-cli php-gd php-xml php-json
+sudo apt install libvirt-bin virtinst libguestfs-tools php-cli php-gd php-xml php-json
 
 # For PHP < 7.4
 sudo apt install ucspi-tcp
