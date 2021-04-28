@@ -25,7 +25,7 @@ SOFTWARE.
 
 // Routing
 // https://www.php.net/manual/en/features.commandline.webserver.php
-if (preg_match('/\.(?:png|jpg|jpeg|gif|js|css)$/', $_SERVER["REQUEST_URI"])) {
+if (preg_match('/\.(?:png|jpg|jpeg|gif|ico|js|css)$/', $_SERVER["REQUEST_URI"])) {
     return false;    // serve the requested resource as-is.
 }
 
@@ -39,10 +39,13 @@ require_once 'inc/bootstrap.php';
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 	<!-- Import materialize.css -->
-	<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css" media="screen,projection"/>
+	<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css" media="screen,projection">
 
 	<!-- Let browser know website is optimized for mobile -->
-	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Block favicon requests -->
+	<link rel="icon" href="data:,">
 
 	<title><?php echo $page_title; ?></title>
 
@@ -263,7 +266,7 @@ require_once 'inc/bootstrap.php';
 					<p class="grey-text text-lighten-4">A simple web interface based on <a href="https://libvirt.org/" rel="nofollow noopener noreferrer" target="_blank">libVirt</a>.</p>
 					<small class="grey-text text-lighten-4"><?php echo 'Generated in ' . $libVirt->get_loading_time() . ' seconds'; ?></small>
 				</div>
-				<div class="col l4 offset-l2 s12">
+				<div class="col l3 offset-l3 s12">
 					<h5 class="white-text">Links</h5>
 					<ul>
 						<li><a class="grey-text text-lighten-3" href="https://github.com/Jiab77/libvirt-web" rel="nofollow noopener noreferrer" target="_blank">Project</a></li>
@@ -273,8 +276,8 @@ require_once 'inc/bootstrap.php';
 		</div>
 		<div class="footer-copyright">
 			<div class="container">
-				<?php echo '&copy; ' . date("Y") . ' &ndash; <a href="github.com/jiab77" rel="nofollow noopener noreferrer" target="_blank">Jiab77</a>'; ?>
-				<a class="grey-text text-lighten-4 right" href="gist.github.com/jiab77" rel="nofollow noopener noreferrer" target="_blank">My gists</a>
+				<?php echo '&copy; ' . date("Y") . ' &ndash; <a href="https://github.com/jiab77" rel="nofollow noopener noreferrer" target="_blank">Jiab77</a>'; ?>
+				<!-- <a class="grey-text text-lighten-4 right" href="https://gist.github.com/jiab77" rel="nofollow noopener noreferrer" target="_blank">My gists</a> -->
 			</div>
 		</div>
 	</footer>
