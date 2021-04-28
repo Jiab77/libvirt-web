@@ -140,15 +140,17 @@ class libVirt {
 	}
 
 	// Other libvirt commands wrapper
-	public function exec_cmd($command, &$output, &$return_code) {
+	public function exec_cmd($command, &$output, &$return_code, $bg = false) {
 		$run_command = escapeshellcmd($command);
 		$redirector = '2>&1';
-		exec($run_command . ' ' . $redirector, $output, $return_code);
+		$to_bg = ($bg === true ? ' &' : '');
+		exec($run_command . ' ' . $redirector . $to_bg, $output, $return_code);
 	}
-	public function exec_cmd_notify($command, &$output, &$return_code) {
+	public function exec_cmd_notify($command, &$output, &$return_code, $bg = false) {
 		$run_command = escapeshellcmd($command);
 		$redirector = '2>&1';
-		exec($run_command . ' ' . $redirector, $output, $return_code);
+		$to_bg = ($bg === true ? ' &' : '');
+		exec($run_command . ' ' . $redirector . $to_bg, $output, $return_code);
 		foreach ($output as $line) {
 			if (!empty($line)) {
 				if (strpos($line, 'error:') !== false) {
@@ -160,15 +162,17 @@ class libVirt {
 			}
 		}
 	}
-	public function passthru_cmd($command, &$return_code = null) {
+	public function passthru_cmd($command, &$return_code = null, $bg = false) {
 		$run_command = escapeshellcmd($command);
 		$redirector = '2>&1';
-		passthru($run_command . ' ' . $redirector, $return_code);
+		$to_bg = ($bg === true ? ' &' : '');
+		passthru($run_command . ' ' . $redirector . $to_bg, $return_code);
 	}
-	public function shell_exec_cmd($command) {
+	public function shell_exec_cmd($command, $bg = false) {
 		$run_command = escapeshellcmd($command);
 		$redirector = '2>&1';
-		return trim(shell_exec($run_command . ' ' . $redirector));
+		$to_bg = ($bg === true ? ' &' : '');
+		return trim(shell_exec($run_command . ' ' . $redirector . $to_bg));
 	}
 
 	// Notifications

@@ -225,8 +225,11 @@ if (isset($vm_action) && !empty($vm_action)) {
 
 		case 'view':
 			$libVirt->notify('Starting virt-viewer...');
-			$exec_cmd = 'virt-viewer -v -w ' . escapeshellarg($_SESSION['selected_vm']) . ' &';
-			$libVirt->exec_cmd_notify($exec_cmd, $exec_output, $ret_action);
+			$exec_cmd = 'virt-viewer --wait --reconnect --domain-name ' . escapeshellarg($_SESSION['selected_vm']);
+			// $libVirt->exec_cmd_notify($exec_cmd, $exec_output, $ret_action, true);
+			$libVirt->exec_cmd($exec_cmd, $exec_output, $ret_action, true);
+			// $libVirt->passthru_cmd($exec_cmd, $ret_action, false);
+			// $libVirt->shell_exec_cmd($exec_cmd, $ret_action, false);
 			break;
 
 		default:
