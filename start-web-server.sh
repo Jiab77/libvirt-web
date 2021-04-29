@@ -13,7 +13,9 @@ PHP_SRV_TYPE=$(php -r "if (version_compare(phpversion(), '7.4', '<')) { echo 'tc
 
 # Run detected server type
 if [[ $PHP_SRV_TYPE == 'embedded' ]]; then
-	PHP_CLI_SERVER_WORKERS=$(nproc) php -S ${LISTEN_INTERFACE}:${LISTEN_PORT} libvirtweb.php
+	# PHP_CLI_SERVER_WORKERS=$(nproc) php -S ${LISTEN_INTERFACE}:${LISTEN_PORT} libvirtweb.php
+	PHP_CLI_SERVER_WORKERS=$(nproc) php -S ${LISTEN_INTERFACE}:${LISTEN_PORT} -t .
 else
-	tcpserver -v -1 0 ${LISTEN_PORT} ./proxy-to-php-server.sh ./libvirtweb.php
+	# tcpserver -v -1 0 ${LISTEN_PORT} ./proxy-to-php-server.sh ./libvirtweb.php
+	tcpserver -v -1 0 ${LISTEN_PORT} ./proxy-to-php-server.sh ./index.php
 fi

@@ -25,12 +25,12 @@ SOFTWARE.
 
 // Routing
 // https://www.php.net/manual/en/features.commandline.webserver.php
-if (preg_match('/\.(?:png|jpg|jpeg|gif|ico|js|css)$/', $_SERVER["REQUEST_URI"])) {
+/* if (preg_match('/\.(?:png|jpg|jpeg|gif|ico|js|css)$/', $_SERVER["REQUEST_URI"])) {
     return false;    // serve the requested resource as-is.
-}
+} */
 
 // Load bootstrapping code
-require_once 'inc/bootstrap.php';
+require 'inc/bootstrap.php';
 ?>
 <!DOCTYPE html>
 <html>
@@ -124,74 +124,6 @@ require_once 'inc/bootstrap.php';
 			<div class="row">
 				<div class="col s12">
 
-					<?php if (!isset($_GET['module']) || (isset($_GET['module']) && empty($_GET['module']))): ?>
-
-					<h1>Modules</h1>
-					<div class="row">
-						<div class="col s6 m4 l3">
-							<div class="card-panel hoverable">
-								<p class="flow-text center-align">
-									<a href="?module=dsh">
-										<i class="material-icons">dashboard</i>
-										<br><span class="truncate">Dashboard</span>
-									</a>
-								</p>
-							</div>
-						</div>
-						<div class="col s6 m4 l3">
-							<div class="card-panel hoverable">
-								<p class="flow-text center-align">
-									<a href="?module=hyp">
-										<i class="material-icons">cloud</i>
-										<br><span class="truncate">Hypervisor</span>
-									</a>
-								</p>
-							</div>
-						</div>
-						<div class="col s6 m4 l3">
-							<div class="card-panel hoverable">
-								<p class="flow-text center-align">
-									<a href="?module=vms">
-										<i class="material-icons">computer</i>
-										<br><span class="truncate">Virtual Machines</span>
-									</a>
-								</p>
-							</div>
-						</div>
-						<div class="col s6 m4 l3">
-							<div class="card-panel hoverable">
-								<p class="flow-text center-align">
-									<a href="?module=vns">
-										<i class="material-icons">router</i>
-										<br><span class="truncate">Virtual Networks</span>
-									</a>
-								</p>
-							</div>
-						</div>
-						<div class="col s6 m4 l3">
-							<div class="card-panel hoverable">
-								<p class="flow-text center-align">
-									<a href="?module=vst">
-										<i class="material-icons">storage</i>
-										<br><span class="truncate">Virtual Storage</span>
-									</a>
-								</p>
-							</div>
-						</div>
-						<div class="col s6 m4 l3">
-							<div class="card-panel hoverable">
-								<p class="flow-text center-align">
-									<a href="?module=hlp">
-										<i class="material-icons">help_outline</i>
-										<br><span class="truncate">Help</span>
-									</a>
-								</p>
-							</div>
-						</div>
-					</div>
-
-					<?php endif; ?>
-
 					<?php
 					if (isset($_GET['module']) && !empty($_GET['module'])) {
 						switch ($module) {
@@ -240,6 +172,9 @@ require_once 'inc/bootstrap.php';
 								require_once __DIR__ . '/modules/invalid.php';
 								break;
 						}
+					}
+					else {
+						require_once __DIR__ . '/modules/list.php';
 					}
 					?>
 
@@ -368,7 +303,11 @@ require_once 'inc/bootstrap.php';
 	?>
 
 	<!--
-	<?php echo 'Debug: ' . print_r($_SERVER, true); ?>
+	<?php echo 'Included files: ' . print_r(get_included_files(), true); ?>
+	-->
+
+	<!--
+	<?php echo 'Framework: ' . print_r($f3, true); ?>
 	-->
 
 </body>

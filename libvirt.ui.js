@@ -90,7 +90,7 @@ $(document).ready(function() {
 	}
 
 	// Init polling from modules
-	if (params) {
+	/* if (params) {
 		switch (params.get('module')) {
 			case 'dsh':
 				var elements = ['cpu', 'mem', 'node', 'preview'];
@@ -161,5 +161,5 @@ $(document).ready(function() {
 			default:
 				break;
 		}
-	}
+	} */
 });
