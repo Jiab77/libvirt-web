@@ -19,7 +19,7 @@ _If you were looking for a `nodejs` version: <https://github.com/Jiab77/libvirt-
 
 The installation process is pretty simple and will require only few dependencies.
 
-The web interface should be able to run on desktops and servers.
+The web interface should be able to run on any desktops and servers.
 
 ## Dependencies
 
@@ -53,8 +53,11 @@ sudo apt install libvirt-bin virt-viewer virtinst libguestfs-tools php-cli php-g
 # For server
 sudo apt install libvirt-bin virtinst libguestfs-tools php-cli php-gd php-xml php-json
 
-# For PHP < 7.4
-sudo apt install ucspi-tcp
+# Restart
+sudo reboot
+
+# Check services status
+systemctl status libvirt-bin.service libvirt-guests.service libvirtd.service -l
 ```
 
 > I still need to validate the packages list so this might change later.
@@ -76,13 +79,25 @@ cd libvirt-web
 ./start-local-server.sh
 ```
 
+If you want to run the server on another interface / port, you can also do the following:
+
+```bash
+# Set another listen interface (it will catch the first IP address in this case)
+LISTEN_INTERFACE=`hostname -I | awk '{ print $1 }'` ./start-web-server.sh
+
+# Set another listen interface (it will catch the FQDN in this case)
+LISTEN_INTERFACE=`hostname -f` ./start-web-server.sh
+
+# Set another list port
+LISTEN_PORT=8888 ./start-web-server.sh
+
+# Set another listen interface and port
+LISTEN_INTERFACE=`hostname -f` LISTEN_PORT=8888 ./start-web-server.sh
+```
+
 > `sudo` is not required to run the server. It is required only if you want to run the server on a port below **1024**.
->
-> You can also choose any other ports than **8000**.
 
 Then navigate to [http://localhost:8000](http://localhost:8000) with your internet browser.
-
-> I'm using Chromium but it should work on any other modern browser.
 
 ### Apache / nginx
 
@@ -110,6 +125,10 @@ Here will be listed missing features / those not working correctly.
   * The upload is working but the uploaded file can't be moved to `/var/lib/libvirt/images`...
   * This is due to access restricted to `sudoers` with filesystem permissions.
 * Graphics are still missing.
+
+## Supported Browsers
+
+I'm using Chromium but it should work on any other modern browser.
 
 ## Thanks
 
