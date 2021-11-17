@@ -1,5 +1,9 @@
 #!/bin/bash -x
 
+# Proxy requests from tcpserver (ucspi-tcp)
+#
+# Deprecated and not used anymore
+#
 # Increasing local web server performances as possible
 # https://stackoverflow.com/questions/39842170/load-balancing-php-built-in-server/47103758#47103758
 
