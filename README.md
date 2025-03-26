@@ -2,7 +2,7 @@
 
 A simple web interface based on [libVirt](https://libvirt.org/) and [PHP](https://www.php.net/).
 
-> This project is still a **Work In Progress**, it might not work correctly on your side.
+> This project is still a **Work In Progress**; it may not work correctly on your host.
 >
 > Please, create an issue in this case so I can track and fix it.
 >
@@ -19,11 +19,11 @@ _If you were looking for a `nodejs` version: <https://github.com/Jiab77/libvirt-
 
 The installation process is pretty simple and will require only few dependencies.
 
-The web interface should be able to run on any desktops and servers.
+The web interface should be able to run on almost any desktop or server.
 
 ## Dependencies
 
-There is only few dependencies required:
+There is only a few dependencies required:
 
 1. `libvirt-bin` (The `virsh` command should be provided by [libVirt](https://libvirt.org/))
 2. `virt-viewer`
@@ -117,7 +117,7 @@ A single file version still exist if you look at the file `libvirtweb.aio.php` b
 
 Here will be listed missing features / those not working correctly.
 
-* Remote connection on VM's using `virt-viewer`.
+* Remote connection on VMs using `virt-viewer`.
   * Works on local only...
 * Connection to remote hypervisor.
   * Not implemented yet / not correctly...

@@ -1170,7 +1170,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 					</div>
 					<div class="row">
 						<div class="col s12">
-							<h3>Running VM's</h3>
+							<h3>Running VMs</h3>
 							<table class="striped">
 								<thead>
 									<tr>
@@ -1210,7 +1210,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 							<?php endif; ?>
 						</div>
 						<div class="col s12">
-							<h3>Active IP's</h3>
+							<h3>Active IPs</h3>
 							<table class="striped">
 								<thead>
 									<tr>
@@ -1381,7 +1381,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 								</div>
 							</div>
 							<h3>
-								Virtual CPU's
+								Virtual CPUs
 								<i class="material-icons tooltipped light-blue-text text-darken-1" style="cursor: pointer;" data-position="right" data-tooltip="View CPU Stats" onclick="$('#modal-cpu-stats').modal('open');">info_outline</i>
 							</h3>
 							<pre><?php
