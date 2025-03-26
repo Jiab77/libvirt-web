@@ -40,7 +40,7 @@ There is only a few dependencies required:
 
 The project has been tested on [Pop_OS!](https://system76.com/pop), a Linux distribution based on [Ubuntu 18.04 LTS](https://wiki.ubuntu.com/BionicBeaver/ReleaseNotes).
 
-It is also tested on FreeBSD by my friend [@Sevendogs5](https://twitter.com/Sevendogs5).
+<!-- It is also tested on FreeBSD by my friend [@Sevendogs5](https://twitter.com/Sevendogs5). -->
 
 ### Ubuntu and derivated distribs
 
@@ -62,9 +62,13 @@ systemctl status libvirt-bin.service libvirt-guests.service libvirtd.service -l
 
 > I still need to validate the packages list so this might change later.
 
+<!--
+
 ### FreeBSD
 
 Instruction will be provided soon.
+
+-->
 
 ## Run the web interface
 
@@ -76,7 +80,7 @@ You can start the server that way:
 
 ```bash
 cd libvirt-web
-./start-local-server.sh
+./start-web-server.sh
 ```
 
 If you want to run the server on another interface / port, you can also do the following:
@@ -97,11 +101,13 @@ LISTEN_INTERFACE=`hostname -f` LISTEN_PORT=8888 ./start-web-server.sh
 
 > `sudo` is not required to run the server. It is required only if you want to run the server on a port below **1024**.
 
-Then navigate to [http://localhost:8000](http://localhost:8000) with your internet browser.
+Then navigate to [http://localhost:8000](http://localhost:8000) (_or any other address you would have defined_) with your internet browser.
 
 ### Apache / nginx
 
 This setup is not tested yet and will be documented later.
+
+> You may have to make a symlink named `index.php` that points to the `libvirtweb.php` file.
 
 ## Breaking Changes
 
@@ -117,14 +123,15 @@ A single file version still exist if you look at the file `libvirtweb.aio.php` b
 
 Here will be listed missing features / those not working correctly.
 
-* Remote connection on VMs using `virt-viewer`.
+* Dark mode
+* Remote connection on VMs using `virt-viewer`
   * Works on local only...
-* Connection to remote hypervisor.
+* Connection to remote hypervisor
   * Not implemented yet / not correctly...
-* ISO image upload.
-  * The upload is working but the uploaded file can't be moved to `/var/lib/libvirt/images`...
+* ISO image upload
+  * The upload is working but the uploaded file can't be moved to `/var/lib/libvirt/images`... (_missing super user privileges_)
   * This is due to access restricted to `sudoers` with filesystem permissions.
-* Graphics are still missing.
+* Graphics are still missing
 
 ## Supported Browsers
 
@@ -142,6 +149,6 @@ Also thanks to my friend [@Sevendogs5](https://twitter.com/Sevendogs5) for suppo
 
 Feel free to contribute by creating pull requests or new issues.
 
-## Contact
+## Author
 
-You can reach me on Twitter by using [@jiab77](https://twitter.com/jiab77).
+* __Jiab77__
