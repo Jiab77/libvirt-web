@@ -46,7 +46,7 @@
 </div>
 <div class="row">
 	<div class="col s12">
-		<h3>Active IP's</h3>
+		<h3>Active IPs</h3>
 
 		<?php foreach ($_SESSION['vm_networks'] as $network): ?>
 

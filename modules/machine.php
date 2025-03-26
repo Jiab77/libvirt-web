@@ -84,7 +84,7 @@
 
 		<?php /*
 		<h3>
-			Virtual CPU's
+			Virtual CPUs
 			<i class="material-icons tooltipped light-blue-text text-darken-1" style="cursor: pointer;" data-position="right" data-tooltip="View CPU Stats" onclick="$('#modal-cpu-stats').modal('open');">info_outline</i>
 		</h3>
 		<pre><?php
