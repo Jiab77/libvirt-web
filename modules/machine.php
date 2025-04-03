@@ -7,14 +7,14 @@
 			<div class="col s7">
 				<h5>Summary</h5>
 				<pre><?php
-				$libVirt->virsh_passthru('dominfo ' . $selected_vm);
+				$libVirt->virsh_passthru('dominfo ' . $_SESSION['selected_vm']);
 				?></pre>
 			</div>
 			<div class="col s5">
 				<h5>Hypervisor</h5>
 				<pre id="vhostcpu-stats" style="height: 300px;"><?php
-				if ($libVirt->vm_is_active($selected_vm)) {
-					$libVirt->virsh_passthru('cpu-stats ' . $selected_vm);
+				if ($libVirt->vm_is_active($_SESSION['selected_vm'])) {
+					$libVirt->virsh_passthru('cpu-stats ' . $_SESSION['selected_vm']);
 				}
 				else {
 					echo 'VM is not running.' . PHP_EOL;
@@ -27,57 +27,59 @@
 			<div class="col s4">
 				<h5>CPU</h5>
 				<pre id="vcpu-stats" style="height: 300px;"><?php
-				if ($libVirt->vm_is_active($selected_vm)) {
-					print_r($libVirt->get_vm_stats($selected_vm, 'cpu'));
+				if ($libVirt->vm_is_active($_SESSION['selected_vm'])) {
+					print_r($libVirt->get_vm_stats($_SESSION['selected_vm'], 'cpu'));
 				}
 				else {
 					echo 'VM is not running.' . PHP_EOL;
-					print_r($libVirt->get_vm_stats($selected_vm, 'cpu'));
+					print_r($libVirt->get_vm_stats($_SESSION['selected_vm'], 'cpu'));
 				}
 				?></pre>
 			</div>
 			<div class="col s4">
 				<h5>Memory</h5>
 				<pre id="vmem-stats" style="height: 300px;"><?php
-				if ($libVirt->vm_is_active($selected_vm)) {
-					// $libVirt->virsh_passthru('dommemstat ' . $selected_vm);
-					print_r($libVirt->get_vm_stats($selected_vm, 'memory'));
+				if ($libVirt->vm_is_active($_SESSION['selected_vm'])) {
+					// $libVirt->virsh_passthru('dommemstat ' . $_SESSION['selected_vm']);
+					print_r($libVirt->get_vm_stats($_SESSION['selected_vm'], 'memory'));
 				}
 				else {
 					echo 'VM is not running.' . PHP_EOL;
-					print_r($libVirt->get_vm_stats($selected_vm, 'memory'));
+					print_r($libVirt->get_vm_stats($_SESSION['selected_vm'], 'memory'));
 				}
 				?></pre>
 			</div>
 			<div class="col s4">
 				<h5>Network</h5>
 				<pre id="vnet-stats" style="height: 300px;"><?php
-				if ($libVirt->vm_is_active($selected_vm)) {
-					print_r($libVirt->get_vm_stats($selected_vm, 'network'));
+				if ($libVirt->vm_is_active($_SESSION['selected_vm'])) {
+					print_r($libVirt->get_vm_stats($_SESSION['selected_vm'], 'network'));
 				}
 				else {
 					echo 'VM is not running.' . PHP_EOL;
+					print_r($libVirt->get_vm_stats($_SESSION['selected_vm'], 'network'));
 				}
 				?></pre>
 			</div>
 			<div class="col s4">
 				<h5>Disk</h5>
 				<pre id="vdsk-stats" style="height: 300px;"><?php
-				if ($libVirt->vm_is_active($selected_vm)) {
-					print_r($libVirt->get_vm_stats($selected_vm, 'disk'));
+				if ($libVirt->vm_is_active($_SESSION['selected_vm'])) {
+					print_r($libVirt->get_vm_stats($_SESSION['selected_vm'], 'disk'));
 				}
 				else {
 					echo 'VM is not running.' . PHP_EOL;
+					print_r($libVirt->get_vm_stats($_SESSION['selected_vm'], 'disk'));
 				}
 				?></pre>
 			</div>
 			<div class="col s8">
 				<h5>Global</h5>
 				<pre id="vhost-stats" style="height: 300px;"><?php
-				$libVirt->virsh_passthru('domstats --raw ' . $selected_vm);
+				$libVirt->virsh_passthru('domstats --raw ' . $_SESSION['selected_vm']);
 				?></pre>
 				<!-- <pre style="height: 300px;"><?php
-				print_r($libVirt->parse_vm_stats($selected_vm, true, true));
+				print_r($libVirt->parse_vm_stats($_SESSION['selected_vm'], true, true));
 				?></pre> -->
 			</div>
 		</div>
@@ -88,13 +90,13 @@
 			<i class="material-icons tooltipped light-blue-text text-darken-1" style="cursor: pointer;" data-position="right" data-tooltip="View CPU Stats" onclick="$('#modal-cpu-stats').modal('open');">info_outline</i>
 		</h3>
 		<pre><?php
-		$libVirt->virsh_passthru('vcpucount ' . $selected_vm);
+		$libVirt->virsh_passthru('vcpucount ' . $_SESSION['selected_vm']);
 		?></pre>
 		<div id="modal-cpu-stats" class="modal modal-fixed-footer">
 			<div class="modal-content">
 				<h4>CPU Stats</h4>
 				<pre><?php
-				$libVirt->virsh_passthru('vcpuinfo ' . $selected_vm);
+				$libVirt->virsh_passthru('vcpuinfo ' . $_SESSION['selected_vm']);
 				?></pre>
 			</div>
 			<div class="modal-footer">
@@ -118,12 +120,13 @@
 			<tbody>
 
 			<?php
-			// $libVirt->virsh_passthru('domiflist ' . $selected_vm);
+			// $libVirt->virsh_passthru('domiflist ' . $_SESSION['selected_vm']);
 
-			$output_ifaces = ''; $ret_ifaces = '';
-			$libVirt->virsh_exec('domiflist --domain ' . $selected_vm, $output_ifaces, $ret_ifaces);
+			$output_ifaces = []; $ret_ifaces = null;
+			$libVirt->virsh_exec('domiflist --domain ' . $_SESSION['selected_vm'], $output_ifaces, $ret_ifaces);
 			if (isset($output_ifaces) && !empty($output_ifaces)) {
-				$libVirt->create_table_generic_rows($output_ifaces, '  ', 5, 'center-align');
+				// $libVirt->create_table_generic_rows($output_ifaces, '  ', 5, 'center-align');
+				$libVirt->create_table_rows('generic', $output_ifaces, '  ', 5, 'center-align');
 			}
 			?>
 
@@ -137,8 +140,8 @@
 		?></pre>
 		<h5>Addresses</h5>
 		<pre><?php
-		if ($libVirt->vm_is_active($selected_vm) && $parsed_iface !== '') {
-			$libVirt->virsh_passthru('domifaddr --domain ' . $selected_vm . ' --interface ' . $parsed_iface);
+		if ($libVirt->vm_is_active($_SESSION['selected_vm']) && $parsed_iface !== '') {
+			$libVirt->virsh_passthru('domifaddr --domain ' . $_SESSION['selected_vm'] . ' --interface ' . $parsed_iface);
 		}
 		else {
 			echo 'VM is not running.' . PHP_EOL;
@@ -157,10 +160,11 @@
 			<tbody>
 
 			<?php
-			$output_devs = ''; $ret_devs = '';
-			$libVirt->virsh_exec('domblklist --details --domain ' . $selected_vm, $output_devs, $ret_devs);
+			$output_devs = []; $ret_devs = null;
+			$libVirt->virsh_exec('domblklist --details --domain ' . $_SESSION['selected_vm'], $output_devs, $ret_devs);
 			if (isset($output_devs) && !empty($output_devs)) {
-				$libVirt->create_table_generic_rows($output_devs, '  ', 4, 'center-align');
+				// $libVirt->create_table_generic_rows($output_devs, '  ', 4, 'center-align');
+				$libVirt->create_table_rows('generic', $output_devs, '  ', 4, 'center-align');
 			}
 			?>
 
@@ -183,12 +187,13 @@
 			<tbody>
 
 			<?php
-			// $libVirt->virsh_passthru('snapshot-list ' . $selected_vm);
+			// $libVirt->virsh_passthru('snapshot-list ' . $_SESSION['selected_vm']);
 
-			$output_snaps = ''; $ret_snaps = '';
-			$libVirt->virsh_exec('snapshot-list --domain ' . $selected_vm, $output_snaps, $ret_snaps);
+			$output_snaps = []; $ret_snaps = null;
+			$libVirt->virsh_exec('snapshot-list --domain ' . $_SESSION['selected_vm'], $output_snaps, $ret_snaps);
 			if (isset($output_snaps) && !empty($output_snaps)) {
-				$libVirt->create_table_generic_rows($output_snaps, '  ', 3, 'center-align');
+				// $libVirt->create_table_generic_rows($output_snaps, '  ', 3, 'center-align');
+				$libVirt->create_table_rows('generic', $output_snaps, '  ', 3, 'center-align');
 			}
 			?>
 
@@ -201,8 +206,8 @@
 		?></pre>
 		<h3>Running Jobs</h3>
 		<pre><?php
-		if ($libVirt->vm_is_active($selected_vm)) {
-			$libVirt->virsh_passthru('domjobinfo --domain ' . $selected_vm);
+		if ($libVirt->vm_is_active($_SESSION['selected_vm'])) {
+			$libVirt->virsh_passthru('domjobinfo --domain ' . $_SESSION['selected_vm']);
 		}
 		else {
 			echo 'VM is not running.' . PHP_EOL;
@@ -211,7 +216,7 @@
 		<!-- <h1>domtime</h1>
 		<pre><?php
 
-		// passthru('virsh domtime ' . escapeshellarg($selected_vm) . ' 2>&1');
+		// passthru('virsh domtime ' . escapeshellarg($_SESSION['selected_vm']) . ' 2>&1');
 		// Working: false
 		// Outputs: error: argument unsupported: QEMU guest agent is not configured
 
@@ -219,7 +224,7 @@
 		<!-- <h1>domfsinfo</h1>
 		<pre><?php
 
-		// passthru('virsh domfsinfo ' . escapeshellarg($selected_vm) . ' 2>&1');
+		// passthru('virsh domfsinfo ' . escapeshellarg($_SESSION['selected_vm']) . ' 2>&1');
 
 		// Working: false
 		// Outputs: error: Unable to get filesystem information
@@ -229,7 +234,7 @@
 		<!-- <h1>domhostname</h1>
 		<pre><?php
 
-		// passthru('virsh domhostname ' . escapeshellarg($selected_vm) . ' 2>&1');
+		// passthru('virsh domhostname ' . escapeshellarg($_SESSION['selected_vm']) . ' 2>&1');
 
 		// Working: false
 		// Outputs: error: failed to get hostname

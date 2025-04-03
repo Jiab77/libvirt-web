@@ -21,9 +21,15 @@ The installation process is pretty simple and will require only few dependencies
 
 The web interface should be able to run on almost any desktop or server.
 
+## Compatibility
+
+The code should be compatible with the latest PHP version.
+
+> Feel free to create a new issue in case you find something that is not working anymore after having updated your PHP version.
+
 ## Dependencies
 
-There is only a few dependencies required:
+There is only a few dependencies required: __*__
 
 1. `libvirt-bin` (The `virsh` command should be provided by [libVirt](https://libvirt.org/))
 2. `virt-viewer`
@@ -36,11 +42,18 @@ There is only a few dependencies required:
 
 > I have dropped the ImageMagick `convert` command from dependencies.
 
+_**\*** The name of the required packages might be different between Ubuntu and Arch Linux based distribs._
+
 ## Plaforms
 
-The project has been tested on [Pop_OS!](https://system76.com/pop), a Linux distribution based on [Ubuntu 18.04 LTS](https://wiki.ubuntu.com/BionicBeaver/ReleaseNotes).
+The project has been tested on:
 
-<!-- It is also tested on FreeBSD by my friend [@Sevendogs5](https://twitter.com/Sevendogs5). -->
+* [Pop_OS!](https://system76.com/pop) (_Ubuntu based distrib_)
+* [CachyOS](https://cachyos.org) (_Arch Linux based distrib_)
+
+And should be compatible with any Ubuntu or Arch Linux based distributions.
+
+> It has also been tested on FreeBSD by my friend [@Sevendogs5](https://twitter.com/Sevendogs5).
 
 ### Ubuntu and derivated distribs
 
@@ -48,10 +61,10 @@ You should only need to install these packages:
 
 ```bash
 # For desktop
-sudo apt install libvirt-bin virt-viewer virtinst libguestfs-tools php-cli php-gd php-xml php-json
+sudo apt install libvirt-bin virt-install virt-viewer virtinst libguestfs-tools php-cli php-gd php-xml php-json
 
 # For server
-sudo apt install libvirt-bin virtinst libguestfs-tools php-cli php-gd php-xml php-json
+sudo apt install libvirt-bin virt-install virtinst libguestfs-tools php-cli php-gd php-xml php-json
 
 # Restart
 sudo reboot
@@ -62,13 +75,32 @@ systemctl status libvirt-bin.service libvirt-guests.service libvirtd.service -l
 
 > I still need to validate the packages list so this might change later.
 
-<!--
+### Arch Linux and derivated distribs
+
+You should only need to install these packages:
+
+```bash
+# For desktop
+paru -S libvirt virt-install virt-viewer guestfs-tools php php-gd
+
+# For server
+paru -S libvirt virt-install guestfs-tools php php-gd
+
+# Enable 'php-gd' extension
+sudo sed -e 's/;extension=gd/extension=gd/' -i /etc/php/php.ini
+
+# Restart
+sudo reboot
+
+# Check services status
+systemctl status libvirtd.service libvirt-guests.service -l
+```
+
+> You can replace `paru` by `sudo pacman` if you don't have `paru` installed.
 
 ### FreeBSD
 
-Instruction will be provided soon.
-
--->
+_Instructions are still missing at the moment._
 
 ## Run the web interface
 
@@ -99,7 +131,17 @@ LISTEN_PORT=8888 ./start-web-server.sh
 LISTEN_INTERFACE=`hostname -f` LISTEN_PORT=8888 ./start-web-server.sh
 ```
 
-> `sudo` is not required to run the server. It is required only if you want to run the server on a port below **1024**.
+> `sudo` __might be required__ to run the server if you want to run the server on a port below `1024` __and/or__ to access VMs created under the `root` user.
+>
+> In this case, you might have to do the following:
+>
+> `cd libvirt-web ; sudo ./start-web-server.sh`
+>
+> Or:
+>
+> `cd libvirt-web ; sudo LISTEN_PORT=8888 ./start-web-server.sh`
+>
+> If you need to set a different listen port or interface.
 
 Then navigate to [http://localhost:8000](http://localhost:8000) (_or any other address you would have defined_) with your internet browser.
 
@@ -123,7 +165,7 @@ A single file version still exist if you look at the file `libvirtweb.aio.php` b
 
 Here will be listed missing features / those not working correctly.
 
-* Dark mode
+* Dark mode 😅
 * Remote connection on VMs using `virt-viewer`
   * Works on local only...
 * Connection to remote hypervisor
@@ -131,7 +173,7 @@ Here will be listed missing features / those not working correctly.
 * ISO image upload
   * The upload is working but the uploaded file can't be moved to `/var/lib/libvirt/images`... (_missing super user privileges_)
   * This is due to access restricted to `sudoers` with filesystem permissions.
-* Graphics are still missing
+* Graphic charts are still missing
 
 ## Supported Browsers
 

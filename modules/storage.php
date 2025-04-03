@@ -18,10 +18,11 @@
 			<tbody>
 
 			<?php
-			$output_vsp = ''; $ret_vsp = '';
-			exec('virsh pool-list --all --details', $output_vsp, $ret_vsp);
+			$output_vsp = []; $ret_vsp = null;
+			$libVirt->virsh_exec('pool-list --all --details', $output_vsp, $ret_vsp);
 			if (isset($output_vsp) && !empty($output_vsp)) {
-				$libVirt->create_table_generic_rows($output_vsp, '  ', 7, 'center-align');
+				// $libVirt->create_table_generic_rows($output_vsp, '  ', 7, 'center-align');
+				$libVirt->create_table_rows('generic', $output_vsp, '  ', 7, 'center-align');
 			}
 			?>
 
@@ -50,10 +51,11 @@
 			<tbody>
 
 			<?php
-			$output_vsv = ''; $ret_vsv = '';
-			exec('virsh vol-list --details --pool default', $output_vsv, $ret_vsv);
+			$output_vsv = []; $ret_vsv = null;
+			$libVirt->virsh_exec('vol-list --details --pool default', $output_vsv, $ret_vsv);
 			if (isset($output_vsv) && !empty($output_vsv)) {
-				$libVirt->create_table_generic_rows($output_vsv, ' ', 5, 'center-align');
+				// $libVirt->create_table_generic_rows($output_vsv, ' ', 5, 'center-align');
+				$libVirt->create_table_rows('generic', $output_vsv, '  ', 7, 'center-align');
 			}
 			?>
 

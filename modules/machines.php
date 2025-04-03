@@ -16,10 +16,11 @@
 			<tbody>
 
 			<?php
-			$output_vms = ''; $ret_vms = '';
-			exec('virsh list --all', $output_vms, $ret_vms);
+			$output_vms = []; $ret_vms = null;
+			$libVirt->virsh_exec('list --all', $output_vms, $ret_vms);
 			if (isset($output_vms) && !empty($output_vms)) {
-				$libVirt->create_table_vms_rows($output_vms, '  ', 5, 'center-align');
+				// $libVirt->create_table_vms_rows($output_vms, '  ', 5, 'center-align');
+				$libVirt->create_table_rows('existing vms', $output_vms, '  ', 5, 'center-align');
 			}
 			?>
 
@@ -64,10 +65,11 @@
 			<tbody>
 
 			<?php
-			$output_ips = ''; $ret_ips = '';
-			exec('virsh net-dhcp-leases ' . $network, $output_ips, $ret_ips);
+			$output_ips = []; $ret_ips = null;
+			$libVirt->virsh_exec('net-dhcp-leases ' . $network, $output_ips, $ret_ips);
 			if (isset($output_ips) && !empty($output_ips)) {
-				$libVirt->create_table_active_ips_rows($output_ips, '  ', 6, 'center-align');
+				// $libVirt->create_table_active_ips_rows($output_ips, '  ', 6, 'center-align');
+				$libVirt->create_table_rows('active ips', $output_ips, '  ', 6, 'center-align');
 			}
 			?>
 

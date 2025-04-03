@@ -15,10 +15,11 @@
 			<tbody>
 
 			<?php
-			$output_vns = ''; $ret_vns = '';
-			exec('virsh net-list --all', $output_vns, $ret_vns);
+			$output_vns = []; $ret_vns = null;
+			$libVirt->virsh_exec('net-list --all', $output_vns, $ret_vns);
 			if (isset($output_vns) && !empty($output_vns)) {
-				$libVirt->create_table_generic_rows($output_vns, '  ', 4, 'center-align');
+				// $libVirt->create_table_generic_rows($output_vns, '  ', 4, 'center-align');
+				$libVirt->create_table_rows('generic', $output_vns, '  ', 4, 'center-align');
 			}
 			?>
 
@@ -51,10 +52,11 @@
 			<tbody>
 
 			<?php
-			$output_ips = ''; $ret_ips = '';
-			exec('virsh net-dhcp-leases ' . $network, $output_ips, $ret_ips);
+			$output_ips = []; $ret_ips = null;
+			$libVirt->virsh_exec('net-dhcp-leases ' . $network, $output_ips, $ret_ips);
 			if (isset($output_ips) && !empty($output_ips)) {
-				$libVirt->create_table_active_ips_rows($output_ips, '  ', 6, 'center-align');
+				// $libVirt->create_table_active_ips_rows($output_ips, '  ', 6, 'center-align');
+				$libVirt->create_table_rows('active ips', $output_ips, '  ', 6, 'center-align');
 			}
 			?>
 
@@ -84,10 +86,11 @@
 			<tbody>
 
 			<?php
-			$output_vnfs = ''; $ret_vnfs = '';
-			exec('virsh nwfilter-list', $output_vnfs, $ret_vnfs);
+			$output_vnfs = []; $ret_vnfs = null;
+			$libVirt->virsh_exec('nwfilter-list', $output_vnfs, $ret_vnfs);
 			if (isset($output_vnfs) && !empty($output_vnfs)) {
-				$libVirt->create_table_generic_rows($output_vnfs, '  ', 2, 'center-align');
+				// $libVirt->create_table_generic_rows($output_vnfs, '  ', 2, 'center-align');
+				$libVirt->create_table_rows('generic', $output_vnfs, '  ', 2, 'center-align');
 			}
 			?>
 

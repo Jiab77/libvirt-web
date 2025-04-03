@@ -14,7 +14,7 @@
 		?></pre>
 	</div>
 	<div class="col s12">
-		<blockquote>The data displayed above will be converted into realtime graph soon.</blockquote>
+		<blockquote>The data displayed above will be converted into realtime graph later.</blockquote>
 	</div>
 	<div class="col s6">
 		<h3>Node</h3>
@@ -45,10 +45,11 @@
 			<tbody>
 
 			<?php
-			$output_vms = ''; $ret_vms = '';
-			exec('virsh list', $output_vms, $ret_vms);
+			$output_vms = []; $ret_vms = null;
+			$libVirt->virsh_exec('list', $output_vms, $ret_vms);
 			if (isset($output_vms) && !empty($output_vms)) {
-				$libVirt->create_table_active_vms_rows($output_vms, '  ', 5, 'center-align');
+				// $libVirt->create_table_active_vms_rows($output_vms, '  ', 5, 'center-align');
+				$libVirt->create_table_rows('active vms', $output_vms, '  ', 5, 'center-align');
 			}
 			?>
 
@@ -95,10 +96,11 @@
 			<tbody>
 
 			<?php
-			$output_ips = ''; $ret_ips = '';
-			exec('virsh net-dhcp-leases ' . $network, $output_ips, $ret_ips);
+			$output_ips = []; $ret_ips = null;
+			$libVirt->virsh_exec('net-dhcp-leases ' . $network, $output_ips, $ret_ips);
 			if (isset($output_ips) && !empty($output_ips)) {
-				$libVirt->create_table_active_ips_rows($output_ips, '  ', 6, 'center-align');
+				// $libVirt->create_table_active_ips_rows($output_ips, '  ', 6, 'center-align');
+				$libVirt->create_table_rows('active ips', $output_ips, '  ', 6, 'center-align');
 			}
 			?>
 

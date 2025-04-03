@@ -10,7 +10,7 @@
 			<div class="col s6 m4 l3">
 				<div class="card-panel hoverable">
 					<p class="flow-text center-align">
-						<a href="<?php echo '?module=' . $module . '&do=view'; ?>">
+						<a href="<?php echo '?module=' . $_SESSION['module'] . '&do=view'; ?>">
 							<i class="material-icons">developer_board</i>
 							<br><span class="truncate">System Info</span>
 						</a>
@@ -20,7 +20,7 @@
 			<div class="col s6 m4 l3">
 				<div class="card-panel hoverable">
 					<p class="flow-text center-align">
-						<a href="<?php echo '?module=' . $module . '&do=create&type=vm'; ?>">
+						<a href="<?php echo '?module=' . $_SESSION['module'] . '&do=create&type=vm'; ?>">
 							<i class="material-icons">computer</i>
 							<br><span class="truncate">Create VM</span>
 						</a>
@@ -30,7 +30,7 @@
 			<div class="col s6 m4 l3">
 				<div class="card-panel hoverable">
 					<p class="flow-text center-align">
-						<a href="<?php echo '?module=' . $module . '&do=create&type=net'; ?>">
+						<a href="<?php echo '?module=' . $_SESSION['module'] . '&do=create&type=net'; ?>">
 							<i class="material-icons">router</i>
 							<br><span class="truncate">Create Network</span>
 						</a>
@@ -40,7 +40,7 @@
 			<div class="col s6 m4 l3">
 				<div class="card-panel hoverable">
 					<p class="flow-text center-align">
-						<a href="<?php echo '?module=' . $module . '&do=create&type=img'; ?>">
+						<a href="<?php echo '?module=' . $_SESSION['module'] . '&do=create&type=img'; ?>">
 							<i class="material-icons">storage</i>
 							<br><span class="truncate">Create Images</span>
 						</a>
@@ -50,7 +50,7 @@
 			<div class="col s6 m4 l3">
 				<div class="card-panel hoverable">
 					<p class="flow-text center-align">
-						<a href="<?php echo '?module=' . $module . '&do=create&type=sto'; ?>">
+						<a href="<?php echo '?module=' . $_SESSION['module'] . '&do=create&type=sto'; ?>">
 							<i class="material-icons">storage</i>
 							<br><span class="truncate">Create Storage</span>
 						</a>
@@ -136,6 +136,9 @@
 		<div class="row">
 			<div class="col s12">
 				<h3>System Info</h3>
+
+				<?php if ($libVirt->connect_info()['auth'] !== 'session'): ?>
+
 				<h6>Parsed data</h6>
 				<pre style="height: 300px;"><?php
 				print_r($libVirtXML->xml2json($libVirt->virsh_shell_exec('sysinfo'), false, true));
@@ -144,6 +147,13 @@
 				<pre style="height: 300px;"><?php
 				echo htmlentities($libVirt->virsh_shell_exec('sysinfo'));
 				?></pre>
+
+				<?php else: ?>
+
+				<p><strong style="color: red;">Please run this project as 'root' to view this section.</strong></p>
+
+				<?php endif; ?>
+
 			</div>
 		</div>
 

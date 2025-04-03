@@ -186,7 +186,7 @@ function virsh_passthru($command, &$return_code = null) {
 	$redirector = '2>&1';
 	passthru($run_command . ' ' . $redirector, $return_code);
 }
-function virsh_connect($uri = 'qemu:///system') {
+function connect($uri = 'qemu:///system') {
 	$output = null;
 	$return_code = null;
 	virsh_exec('connect --name ' . $uri, $output, $return_code);
@@ -1872,8 +1872,8 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 	<!-- Connection -->
 	<?php
 	if (!isset($_SESSION['connected']) || (isset($_SESSION['connected']) && $_SESSION['connected'] !== true)) {
-		// var_dump(virsh_connect(), $_SESSION);
-		virsh_connect();
+		// var_dump(connect(), $_SESSION);
+		connect();
 	}
 	?>
 

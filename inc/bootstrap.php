@@ -55,38 +55,41 @@ if (isset($_SESSION) && is_array($_SESSION) &&
 
 // Content selector
 if (isset($_GET['module']) && !empty($_GET['module'])) {
-	$module = htmlentities(strip_tags(filter_var($_GET['module'], FILTER_SANITIZE_STRING)));
+	$module = $libVirt->sanitize($_GET['module']);
 	$_SESSION['module'] = $module;
 }
 if (isset($_GET['action']) && !empty($_GET['action'])) {
-	$vm_action = htmlentities(strip_tags(filter_var($_GET['action'], FILTER_SANITIZE_STRING)));
+	$vm_action = $libVirt->sanitize($_GET['action']);
 }
 if (isset($_GET['do']) && !empty($_GET['do'])) {
-	$module_action = htmlentities(strip_tags(filter_var($_GET['do'], FILTER_SANITIZE_STRING)));
+	$module_action = $libVirt->sanitize($_GET['do']);
 }
 if (isset($_GET['name']) && !empty($_GET['name'])) {
-	$selected_vm = htmlentities(strip_tags(filter_var($_GET['name'], FILTER_SANITIZE_STRING)));
-	$_SESSION['selected_vm'] = $selected_vm;
+	$_SESSION['selected_vm'] = $libVirt->sanitize($_GET['name']);
 }
 if (isset($_GET['uri']) && !empty($_GET['uri'])) {
-	$connect_uri = htmlentities(strip_tags(filter_var($_GET['uri'], FILTER_SANITIZE_STRING)));
-	$_SESSION['connect_uri'] = $connect_uri;
+	$_SESSION['connect_uri'] = $libVirt->sanitize($_GET['uri']);
 }
 if (isset($_GET['user']) && !empty($_GET['user'])) {
-	$connect_user = htmlentities(strip_tags(filter_var($_GET['user'], FILTER_SANITIZE_STRING)));
-	$_SESSION['connect_user'] = $connect_user;
+	$_SESSION['connect_user'] = $libVirt->sanitize($_GET['user']);
 }
 
 // Displayed title
-$hypervisor  = json_decode($libVirtXML->xml2json($libVirt->virsh_shell_exec('sysinfo'), false, false));
-$host_title  = $hypervisor->system->entry[0]->attributes->{'nodeValue'};
-$host_title .= ' ';
-$host_title .= $hypervisor->system->entry[1]->attributes->{'nodeValue'};
+if ($libVirt->connect_info()['auth'] !== 'session') {
+	$hypervisor  = json_decode($libVirtXML->xml2json($libVirt->virsh_shell_exec('sysinfo'), false, false));
+	$host_title  = $hypervisor->system->entry[0]->attributes->{'nodeValue'};
+	$host_title .= ' ';
+	$host_title .= $hypervisor->system->entry[1]->attributes->{'nodeValue'};
+}
+else {
+	$host_title = 'localhost';
+}
 $project_title = 'libVirt Web';
 if (isset($module) && !empty($module)) {
 	switch ($module) {
 		case 'dsh': $module_title = 'Dashboard'; break;
 		case 'hyp': $module_title = 'Hypervisor'; break;
+		case 'inf': $module_title = 'PHP Info'; break;
 		case 'vmi': $module_title = 'Virtual Machine &ndash; ' . $_SESSION['selected_vm']; break;
 		case 'vms': $module_title = 'Virtual Machines'; break;
 		case 'vni': $module_title = 'Virtual Network &ndash; ' . $_SESSION['selected_vm']; break;
@@ -97,12 +100,12 @@ if (isset($module) && !empty($module)) {
 	}
 
 	$page_title  = $project_title;
-	$page_title .= (!empty($host_title) ? ' &ndash; ' . $host_title : '');
-	$page_title .= (!empty($module_title) ? ' &ndash; ' . $module_title : '');
+	$page_title .= !empty($host_title) ? ' &ndash; ' . $host_title : '';
+	$page_title .= !empty($module_title) ? ' &ndash; ' . $module_title : '';
 }
 else {
 	$page_title  = $project_title;
-	$page_title .= (!empty($host_title) ? ' &ndash; ' . $host_title : '');
+	$page_title .= !empty($host_title) ? ' &ndash; ' . $host_title : '';
 }
 
 // Actions (All Modules)
@@ -250,13 +253,13 @@ if (isset($module_action) && !empty($module_action)) {
 			elseif (isset($_SESSION['connect_uri']) &&
 					$_SESSION['connect_uri'] === 'session' ||
 					$_SESSION['connect_uri'] === 'system') {
-						$qemu_uri = 'qemu://' . $_SESSION['connect_uri'];
+						$qemu_uri = 'qemu:///' . $_SESSION['connect_uri'];
 			}
 			else {
 				$qemu_uri = null;
 			}
 			if (!is_null($qemu_uri)) {
-				$libVirt->virsh_connect($qemu_uri);
+				$libVirt->connect($qemu_uri);
 			}
 			break;
 
@@ -290,7 +293,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Ajax
 if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 	if (isset($_REQUEST['data']) && !empty($_REQUEST['data'])) {
-		$client_request = htmlentities(strip_tags(filter_var($_REQUEST['data'], FILTER_SANITIZE_STRING)));
+		$client_request = $libVirt->sanitize($_REQUEST['data']);
 
 		switch ($client_request) {
 			case 'cpu':
@@ -370,7 +373,7 @@ if (isset($_REQUEST['module']) && $_REQUEST['module'] === 'ajx') {
 		}
 
 		// Prepare ajax response
-		$client_response = $libVirt->ajax_response($client_response, $_SESSION['selected_vm']);
+		$client_response = $libVirt->ajax_response($client_response, @$_SESSION['selected_vm']);
 
 		// Send ajax response as JSON
 		$libVirt->send_json($client_response, true);

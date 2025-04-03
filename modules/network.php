@@ -20,10 +20,11 @@
 			<tbody>
 
 			<?php
-			$output_ips = ''; $ret_ips = '';
-			exec('virsh net-dhcp-leases ' . $network, $output_ips, $ret_ips);
+			$output_ips = []; $ret_ips = null;
+			$libVirt->virsh_exec('net-dhcp-leases ' . $network, $output_ips, $ret_ips);
 			if (isset($output_ips) && !empty($output_ips)) {
-				$libVirt->create_table_active_ips_rows($output_ips, '  ', 6, 'center-align');
+				// $libVirt->create_table_active_ips_rows($output_ips, '  ', 6, 'center-align');
+				$libVirt->create_table_rows('active ips', $output_ips, '  ', 6, 'center-align');
 			}
 			?>
 

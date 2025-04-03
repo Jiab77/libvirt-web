@@ -35,21 +35,25 @@ require_once 'inc/bootstrap.php';
 <!DOCTYPE html>
 <html>
 <head>
-	<!-- Import Google Icon Font -->
-	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-	<!-- Import materialize.css -->
-	<link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css" media="screen,projection">
+	<!-- Performance Tags -->
+	<link rel="dns-prefetch" href="https://fonts.googleapis.com/">
 
 	<!-- Let browser know website is optimized for mobile -->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+	<!-- Import Google Icon Font -->
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+	<!-- Import materialize.css -->
+	<link type="text/css" rel="stylesheet" href="/vendor/materialize/0.100.2/css/materialize.min.css" media="screen,projection">
+
 	<!-- Block favicon requests -->
 	<link rel="icon" href="data:,">
 
+	<!-- Page Title -->
 	<title><?php echo $page_title; ?></title>
 
-	<!-- Custom style -->
+	<!-- App CSS -->
 	<style>
 	body {
 		display: flex;
@@ -84,20 +88,22 @@ require_once 'inc/bootstrap.php';
 					<ul class="right hide-on-med-and-down">
 						<li><a href="?module=dsh" class="tooltipped" data-position="bottom" data-tooltip="Show dashboard"><i class="material-icons left">dashboard</i>Dashboard</a></li>
 						<li><a href="./" class="tooltipped" data-position="bottom" data-tooltip="Show modules"><i class="material-icons left">apps</i>Modules</a></li>
-						<li><a href="#modal-help" class="tooltipped modal-trigger" data-position="bottom" data-html="true" data-tooltip="Display &lt;strong&gt;virsh&lt;/strong&gt; commands"><i class="material-icons left">help_outline</i>Help</a></li>
+						<li><a href="#modal-help" class="tooltipped modal-trigger" data-position="bottom" data-html="true" data-tooltip="Show &lt;strong&gt;virsh&lt;/strong&gt; commands"><i class="material-icons left">help_outline</i>Help</a></li>
 						<li><a href="#!" onclick="window.location.reload();" class="tooltipped" data-position="bottom" data-tooltip="Refresh"><i class="material-icons left">refresh</i>Refresh</a></li>
 						<li><a href="#!" class="dropdown-button" data-activates="settings-dropdown" data-hover="false" data-alignment="right" data-belowOrigin="true"><i class="material-icons left">settings</i>Settings<i class="material-icons right">arrow_drop_down</i></a></li>
 					</ul>
 					<ul id="settings-dropdown" class="dropdown-content">
+						<li><a href="#!"><strong style="color: black;"><?php echo $host_title; ?></strong></a></li>
+						<li class="divider"></li>
 						<li><a href="#!" class="display-expand"><i class="material-icons left">swap_horiz</i>Expand display</a></li>
 						<li><a href="#modal-connect" class="modal-trigger"><i class="material-icons left">settings_ethernet</i>Connection</a></li>
 						<li class="divider"></li>
-						<li><a href="#!">Other</a></li>
+						<li><a href="?module=inf"><i class="material-icons left">info_outline</i>PHP Info</a></li>
 					</ul>
 					<ul class="side-nav" id="mobile-demo">
 						<li><a href="?module=dsh" class="tooltipped" data-position="bottom" data-tooltip="Show dashboard"><i class="material-icons left">dashboard</i>Dashboard</a></li>
 						<li><a href="./" class="tooltipped" data-position="bottom" data-tooltip="Show modules"><i class="material-icons left">apps</i>Modules</a></li>
-						<li><a href="?module=hlp" title="Display 'virsh' commands"><i class="material-icons left">help_outline</i>Help</a></li>
+						<li><a href="?module=hlp" title="Show 'virsh' commands"><i class="material-icons left">help_outline</i>Help</a></li>
 						<li><a href="#!" onclick="window.location.reload();" class="tooltipped" data-position="bottom" data-tooltip="Refresh"><i class="material-icons left">refresh</i>Refresh</a></li>
 						<li class="no-padding">
 							<ul class="collapsible collapsible-accordion">
@@ -107,7 +113,7 @@ require_once 'inc/bootstrap.php';
 										<ul>
 											<li><a href="#!" class="display-expand"><i class="material-icons left">swap_horiz</i>Expand display</a></li>
 											<li><a href="#modal-connect" class="modal-trigger"><i class="material-icons left">settings_ethernet</i>Connection</a></li>
-											<li><a href="#!">Other</a></li>
+											<li><a href="?module=inf"><i class="material-icons left">info_outline</i>PHP Info</a></li>
 										</ul>
 									</div>
 								</li>
@@ -181,6 +187,16 @@ require_once 'inc/bootstrap.php';
 						<div class="col s6 m4 l3">
 							<div class="card-panel hoverable">
 								<p class="flow-text center-align">
+									<a href="?module=inf">
+										<i class="material-icons">info_outline</i>
+										<br><span class="truncate">PHP Info</span>
+									</a>
+								</p>
+							</div>
+						</div>
+						<div class="col s6 m4 l3">
+							<div class="card-panel hoverable">
+								<p class="flow-text center-align">
 									<a href="?module=hlp">
 										<i class="material-icons">help_outline</i>
 										<br><span class="truncate">Help</span>
@@ -191,10 +207,9 @@ require_once 'inc/bootstrap.php';
 					</div>
 
 					<?php endif; ?>
-
 					<?php
 					if (isset($_GET['module']) && !empty($_GET['module'])) {
-						switch ($module) {
+						switch ($_GET['module']) {
 							// TODO: Should be rewritten to handle all networks
 							case 'dsh':
 								require_once __DIR__ . '/modules/dashboard.php';
@@ -203,6 +218,11 @@ require_once 'inc/bootstrap.php';
 							// TODO: Finish this part
 							case 'hyp':
 								require_once __DIR__ . '/modules/hypervisor.php';
+								break;
+
+							// TODO: Finish this part
+							case 'inf':
+								require_once __DIR__ . '/modules/info.php';
 								break;
 
 							// TODO: Finish this part
@@ -242,7 +262,6 @@ require_once 'inc/bootstrap.php';
 						}
 					}
 					?>
-
 					<?php if (isset($_GET['module'])): ?>
 
 					<div class="row">
@@ -269,7 +288,11 @@ require_once 'inc/bootstrap.php';
 				<div class="col l3 offset-l3 s12">
 					<h5 class="white-text">Links</h5>
 					<ul>
-						<li><a class="grey-text text-lighten-3" href="https://github.com/Jiab77/libvirt-web" rel="nofollow noopener noreferrer" target="_blank">Project</a></li>
+						<li>
+							<a href="https://github.com/Jiab77/libvirt-web" rel="nofollow noopener noreferrer" target="_blank">
+								<i class="material-icons left grey-text text-lighten-3">link</i>Project
+							</a>
+						</li>
 					</ul>
 				</div>
 			</div>
@@ -277,7 +300,6 @@ require_once 'inc/bootstrap.php';
 		<div class="footer-copyright">
 			<div class="container">
 				<?php echo '&copy; ' . date("Y") . ' &ndash; <a href="https://github.com/jiab77" rel="nofollow noopener noreferrer" target="_blank">Jiab77</a>'; ?>
-				<!-- <a class="grey-text text-lighten-4 right" href="https://gist.github.com/jiab77" rel="nofollow noopener noreferrer" target="_blank">My gists</a> -->
 			</div>
 		</div>
 	</footer>
@@ -303,19 +325,19 @@ require_once 'inc/bootstrap.php';
 					<div class="row">
 						<div class="col s4">
 							<p>
-								<input class="with-gap" name="connect-mode" type="radio" id="connect-mode-system" checked />
+								<input class="with-gap" name="connect-mode-system" type="radio" id="connect-mode-system" <?php echo $libVirt->connect_info()['auth'] === 'system' ? 'checked ' : '' ?>/>
 								<label for="connect-mode-system">System</label>
 							</p>
 						</div>
 						<div class="col s4">
 							<p>
-								<input class="with-gap" name="connect-mode" type="radio" id="connect-mode-session" />
+								<input class="with-gap" name="connect-mode-session" type="radio" id="connect-mode-session" <?php echo $libVirt->connect_info()['auth'] === 'session' ? 'checked ' : '' ?>/>
 								<label for="connect-mode-session">Session</label>
 							</p>
 						</div>
 						<div class="col s4">
 							<p>
-								<input class="with-gap" name="connect-mode" type="radio" id="connect-mode-ssh" />
+								<input class="with-gap" name="connect-mode-ssh" type="radio" id="connect-mode-ssh" <?php echo $libVirt->connect_info()['auth'] === 'ssh' ? 'checked ' : '' ?>/>
 								<label for="connect-mode-ssh">SSH</label>
 							</p>
 						</div>
@@ -340,20 +362,22 @@ require_once 'inc/bootstrap.php';
 	</div>
 
 	<!-- Import jQuery before materialize.js -->
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+	<script type="text/javascript" src="/vendor/jquery/3.7.1/jquery.min.js"></script>
+	<script type="text/javascript" src="/vendor/materialize/0.100.2/js/materialize.min.js"></script>
 
 	<!-- App JS -->
-	<script type="text/javascript" src="<?php echo '//' . $_SERVER['HTTP_HOST'] . '/libvirt.js'; ?>"></script>
-	<script type="text/javascript" src="<?php echo '//' . $_SERVER['HTTP_HOST'] . '/libvirt.ui.js'; ?>"></script>
+	<script type="text/javascript" src="/libvirt.js"></script>
+	<script type="text/javascript" src="/libvirt.ui.js"></script>
 
 	<!-- Connection -->
 	<?php
 	if (!isset($_SESSION['connected']) || (isset($_SESSION['connected']) && $_SESSION['connected'] !== true)) {
-		// var_dump($libVirt->virsh_connect(), $_SESSION);
-		$libVirt->virsh_connect();
+		// var_dump($libVirt->connect(), $_SESSION);
+		$libVirt->connect();
 	}
 	?>
+
+	<!-- Connected to: <?php echo $libVirt->connect_uri(); ?> -->
 
 	<!-- Notifications -->
 	<?php
@@ -366,6 +390,10 @@ require_once 'inc/bootstrap.php';
 		}
 	}
 	?>
+
+	<!--
+	<?php echo 'Session: ' . print_r($_SESSION, true); ?>
+	-->
 
 	<!--
 	<?php echo 'Debug: ' . print_r($_SERVER, true); ?>
